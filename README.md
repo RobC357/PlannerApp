@@ -8,10 +8,9 @@ To create an exciting organizer web application along with Artificial-Intelligen
 
 ## Members
 
-Team Members:
-Akib Kazi 
-Raj Gajera 
-Isaac Ortega 
-Robert Chu 
-Vishnu Dawah 
+Akib Kazi\
+Raj Gajera \
+Isaac Ortega \
+Robert Chu \
+Vishnu Dawah \
 Dhruvi Gajera 
