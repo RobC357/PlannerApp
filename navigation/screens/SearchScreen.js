@@ -1,13 +1,23 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 
 const SearchScreen = () => {
   return (
-    <View>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text>Search Screen</Text>
-      {/* Add your Search screen UI components here */}
-    </View>
+      {
+        <Text>maybe have a built in stack in here for the gpt queries</Text>
+      }
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 export default SearchScreen;

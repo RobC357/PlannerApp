@@ -1,13 +1,23 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 
-const SavedEntries = () => {
+const SavedEntriesScreen = () => {
   return (
-    <View>
-      <Text>Saved Entries</Text>
-      {/* Add your Search screen UI components here */}
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text>Saved Entries Screen</Text>
+      {
+        <Text>show the saved request from search here, maybe add stack to show more details?</Text>
+      }
+    </ScrollView>
   );
 };
 
-export default SavedEntries;
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+
+export default SavedEntriesScreen;
