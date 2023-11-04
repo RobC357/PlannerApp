@@ -1,24 +1,49 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleLogin = () => 
   {
+    if (username.trim() === '' && password.trim() === '') {
+      setError('Please fill in a username and password.');
+    } 
+    else if (username.trim() === '') {
+      setError('Please fill in a username.');
+    } 
+    else if (password.trim() === '') {
+      setError('Please fill in a password.');
+    } 
+    else {
+      /// DO POST HERE ********************************************************
+      handleClose();
+      
 
+    }
+    resetErrorMessage();
   };
 
+  const resetErrorMessage = () => {
+    setTimeout(() => {
+      setError('');
+    }, 1500);
+    return;
+  }
+
   const handleClose = () => {
-    navigation.goBack();
+    navigation.navigate('LandingPage');
   };
 
   return (
+    <KeyboardAwareScrollView contentContainerStyle={styles.container} enableOnAndroid={true} keyboardShouldPersistTaps="handled">
     <View style={styles.container}>
     <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-      <AntDesign name="close" size={24} color="black" />
+      <AntDesign name="close" size={25} color="black" />
     </TouchableOpacity>
     <Text style={styles.title}>Login</Text>
     <View style={styles.inputContainer}>
@@ -38,8 +63,13 @@ const LoginScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
+      <View style={styles.errorContainer}>
+          {error !== '' && <Text style={styles.errorText}>{error}</Text>}
+          {error === '' && <Text style={styles.errorText}></Text>}
+          </View>
     </View>
   </View>
+  </KeyboardAwareScrollView>
 );
 };
 
@@ -86,6 +116,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  errorContainer: {
+    width: '80%',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  errorText: {
+    height: 20,
+    color: 'red',
   },
 });
 

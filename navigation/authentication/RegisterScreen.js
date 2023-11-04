@@ -1,26 +1,61 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const RegisterScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleRegister = () => 
   {
-    
+    if (firstName.trim() === '' || lastName.trim() === '' || username.trim() === '' || password.trim() === '') {
+      setError('Please fill in all fields.');
+      resetErrorMessage();
+      return;
+    }
+
+    if (!/^[a-zA-Z]*$/g.test(firstName) || !/^[a-zA-Z]*$/g.test(lastName)) {
+      setError('First and Last name should contain only characters.');
+      resetErrorMessage();
+      return;
+    }
+
+    if (username.length < 3) {
+      setError('Username should contain at least three characters.');
+      resetErrorMessage();
+      return;
+    }
+
+    if (!/(?=.*[A-Z])(?=.*[0-9])/.test(password)) {
+      setError('Password must contain at least one uppercase letter and one number.');
+      resetErrorMessage();
+      return;
+    }
+
+    // DO POST HERE ********************************************************
+    handleClose();
+
   };
 
+  const resetErrorMessage = () => {
+    setTimeout(() => {
+      setError('');
+    }, 1500);
+    return;
+  }
+
   const handleClose = () => {
-    navigation.goBack();
+    navigation.navigate('LandingPage');
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAwareScrollView contentContainerStyle={styles.container} enableOnAndroid={true} keyboardShouldPersistTaps="handled">
       <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-        <AntDesign name="close" size={24} color="black" />
+        <AntDesign name="close" size={25} color="black" />
       </TouchableOpacity>
       <Text style={styles.title}>Register</Text>
       <View style={styles.inputContainer}>
@@ -52,8 +87,12 @@ const RegisterScreen = ({ navigation }) => {
         <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
+        <View style={styles.errorContainer}>
+          {error !== '' && <Text style={styles.errorText}>{error}</Text>}
+          {error === '' && <Text style={styles.errorText}></Text>}
       </View>
-    </View>
+      </View>
+      </KeyboardAwareScrollView>
   );
 };
 
@@ -62,7 +101,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    width: "100%",
   },
   closeButton: {
     position: 'absolute',
@@ -99,6 +138,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  errorContainer: {
+    width: '80%',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  errorText: {
+    height: 20,
+    color: 'red',
   },
 });
 

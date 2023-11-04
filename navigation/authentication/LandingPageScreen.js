@@ -37,15 +37,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    paddingHorizontal: 100,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 30,
+    textAlign: 'center',
   },
   buttonContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
   },
   button: {
     backgroundColor: 'blue',

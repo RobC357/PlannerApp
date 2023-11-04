@@ -28,12 +28,14 @@ import SavedEntriesScreen from './navigation/savedEntries/SavedEntriesScreen';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
+// ******************************** STACK SCREEN AREA *************************************
+
 // Create the search stack
 const SearchStack = () => {
   return (
     <Stack.Navigator screenOptions={{ animationEnabled: true, gestureEnabled: true, gestureDirection: 'horizontal' }}>
       <Stack.Screen name="Search" component={SearchScreen} options={{ headerLeft: () => null, title: '',}}/>
-
+      
     </Stack.Navigator>
   );
 };
