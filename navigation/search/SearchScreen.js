@@ -1,13 +1,13 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Button, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const SearchScreen = () => {
+ 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text>Search Screen</Text>
-      {
-        <Text>maybe have a built in stack in here for the gpt queries</Text>
-      }
+      <Text>Search Screen (where you do the gpt commands) </Text>
+
     </ScrollView>
   );
 };

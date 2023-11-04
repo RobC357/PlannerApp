@@ -4,10 +4,8 @@ import { View, Text, ScrollView, StyleSheet } from 'react-native';
 const ProfileScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text>Profile Screen</Text>
-      {
-        <Text>profile page, can log out here</Text>
-      }
+      <Text>Profile Screen (where you can view your profile, and possible log off) </Text>
+
     </ScrollView>
   );
 };

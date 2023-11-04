@@ -4,10 +4,8 @@ import { View, Text, ScrollView, StyleSheet } from 'react-native';
 const SettingsScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text>Settings Screen</Text>
-      {
-        <Text>could remove if needed, in case we want added functionality within the app</Text>
-      }
+      <Text>Settings Screen (maybe change some app settings here? like dark mode or other things.)
+        {'\n'} Can remove if needed </Text>
     </ScrollView>
   );
 };

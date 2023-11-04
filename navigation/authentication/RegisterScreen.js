@@ -14,7 +14,7 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   const handleClose = () => {
-    navigation.navigate('Home');
+    navigation.goBack();
   };
 
   return (
