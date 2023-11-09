@@ -14,6 +14,13 @@ To make commits, clone the git via git bash or use Visual Studio Code \
 https://git-scm.com/downloads \
 https://code.visualstudio.com/
 
+Also, to configure your credentials in git, refer to this \
+https://stackoverflow.com/questions/42318673/changing-the-git-user-inside-visual-studio-code
+
+You may install the Expo Go extensions in Visual Studio Code to use `npx`
+
+Also install node.js to do `npm` commands https://nodejs.org/en/
+
 Do not forget to `npm install` and `npm audit fix` after cloning and pulling!
 
 `npx expo start` is the command to start the app.
