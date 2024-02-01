@@ -25,6 +25,10 @@ Do not forget to `npm install` and `npm audit fix` after cloning and pulling!
 
 `npx expo start` is the command to start the app.
 
+If you cannot connect your device to expo go, try doing `npx expo start --clear` to clear cache and make sure the WI-FI is the same for both the debug phone and the computer with VS Code
+
+If it still does not work, try tunneling it with `npx expo start --tunnel`
+
 ## Members
 
 Akib Kazi\
