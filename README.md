@@ -29,6 +29,8 @@ If you cannot connect your device to expo go, try doing `npx expo start --clear`
 
 If it still does not work, try tunneling it with `npx expo start --tunnel`
 
+This app uses Firebase, so create a user login with your email.
+
 ## Members
 
 Akib Kazi\
