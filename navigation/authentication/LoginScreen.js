@@ -1,76 +1,117 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+
+const auth = getAuth();
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
-  const handleLogin = () => 
-  {
+  const handleLogin = async () => {
     if (username.trim() === '' && password.trim() === '') {
       setError('Please fill in a username and password.');
-    } 
-    else if (username.trim() === '') {
+    } else if (username.trim() === '') {
       setError('Please fill in a username.');
-    } 
-    else if (password.trim() === '') {
+    } else if (password.trim() === '') {
       setError('Please fill in a password.');
-    } 
-    else {
-      /// DO POST HERE ********************************************************
-      handleClose();
-      
-
+    } else {
+      try {
+        await signInWithEmailAndPassword(auth, username, password);
+        handleClose();
+        resetErrorMessage();
+      } catch (error) {
+        // Handle specific error cases
+        switch (error.code) {
+          case 'auth/user-not-found':
+            setError('User not found. Please check your email.');
+            break;
+          case 'auth/wrong-password':
+            setError('Invalid password. Please check your password.');
+            break;
+          default:
+            setError('Login failed. Please try again later.');
+        }
+      }
     }
-    resetErrorMessage();
+  };
+
+  const handleForgotPassword = async () => {
+    if (username.trim() === '') {
+      setError('Please fill in your username to reset the password.');
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, username);
+      setResetEmailSent(true);
+      Alert.alert('Password Reset Email Sent', 'Check your email for instructions to reset your password.');
+    } catch (error) {
+      setError('Error sending password reset email.');
+    }
   };
 
   const resetErrorMessage = () => {
     setTimeout(() => {
       setError('');
     }, 1500);
-    return;
-  }
+  };
 
   const handleClose = () => {
     navigation.navigate('LandingPage');
   };
 
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <KeyboardAwareScrollView contentContainerStyle={styles.container} enableOnAndroid={true} keyboardShouldPersistTaps="handled">
-    <View style={styles.container}>
-    <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-      <AntDesign name="close" size={25} color="black" />
-    </TouchableOpacity>
-    <Text style={styles.title}>Login</Text>
-    <View style={styles.inputContainer}>
-      <TextInput
-        style={styles.input}
-        value={username}
-        onChangeText={setUsername}
-        placeholder="Username"
-      />
-      <TextInput
-        style={styles.input}
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Password"
-        secureTextEntry
-      />
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-      <View style={styles.errorContainer}>
-          {error !== '' && <Text style={styles.errorText}>{error}</Text>}
-          {error === '' && <Text style={styles.errorText}></Text>}
+      <View style={styles.container}>
+        <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+          <AntDesign name="close" size={25} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Login</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            value={username}
+            onChangeText={setUsername}
+            placeholder="Email"
+          />
+          <View style={styles.passwordInputContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Password"
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity onPress={toggleShowPassword} style={styles.showHideButton}>
+              <AntDesign name={showPassword ? 'eye' : 'eyeo'} size={20} color="black" />
+            </TouchableOpacity>
           </View>
-    </View>
-  </View>
-  </KeyboardAwareScrollView>
-);
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleForgotPassword}>
+            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          </TouchableOpacity>
+          {resetEmailSent && (
+            <Text style={styles.errorText}>Password reset email sent successfully.</Text>
+          )}
+          <View style={styles.errorContainer}>
+            {error !== '' && <Text style={styles.errorText}>{error}</Text>}
+          </View>
+        </View>
+      </View>
+    </KeyboardAwareScrollView>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -105,6 +146,24 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: 'white',
   },
+  passwordInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  passwordInput: {
+    flex: 1,
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    backgroundColor: 'white',
+  },
+  showHideButton: {
+    padding: 10,
+  },
   loginButton: {
     backgroundColor: 'blue',
     padding: 15,
@@ -117,6 +176,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  forgotPasswordText: {
+    color: 'blue',
+    marginTop: 10,
+    textDecorationLine: 'underline',
+  },
   errorContainer: {
     width: '80%',
     alignItems: 'center',
@@ -125,6 +189,9 @@ const styles = StyleSheet.create({
   errorText: {
     height: 20,
     color: 'red',
+    marginTop: 10,
+    textAlign: 'center',
+    width: '150%',
   },
 });
 

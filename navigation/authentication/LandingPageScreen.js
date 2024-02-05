@@ -10,10 +10,6 @@ const LandingPageScreen = ({ navigation, setUserLoggedIn }) => {
     navigation.navigate('Register');
   };
 
-  const handleAssumeLogin = () => {
-    setUserLoggedIn(true); // Setting userLoggedIn state in App.js
-  };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to TripEasy</Text>
@@ -23,9 +19,6 @@ const LandingPageScreen = ({ navigation, setUserLoggedIn }) => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={handleRegister}>
           <Text style={styles.buttonText}>Register</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleAssumeLogin}>
-          <Text style={styles.buttonText}>Assume Login !DEBUG!</Text>
         </TouchableOpacity>
       </View>
     </View>

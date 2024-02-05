@@ -2,30 +2,26 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+
+const auth = getAuth();
 
 const RegisterScreen = ({ navigation }) => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleRegister = () => 
-  {
-    if (firstName.trim() === '' || lastName.trim() === '' || username.trim() === '' || password.trim() === '') {
+  const handleRegister = async () => {
+    if (displayName.trim() === '' || email.trim() === '' || password.trim() === '') {
       setError('Please fill in all fields.');
       resetErrorMessage();
       return;
     }
 
-    if (!/^[a-zA-Z]*$/g.test(firstName) || !/^[a-zA-Z]*$/g.test(lastName)) {
-      setError('First and Last name should contain only characters.');
-      resetErrorMessage();
-      return;
-    }
-
-    if (username.length < 3) {
-      setError('Username should contain at least three characters.');
+    // Check for a valid email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Please enter a valid email address.');
       resetErrorMessage();
       return;
     }
@@ -36,17 +32,27 @@ const RegisterScreen = ({ navigation }) => {
       return;
     }
 
-    // DO POST HERE ********************************************************
-    handleClose();
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
+      // Set the display name for the user
+      await updateProfile(userCredential.user, { displayName: displayName });
+
+      // Navigate to the profile screen
+      navigation.navigate('Profile');
+    } catch (error) {
+      // Handle registration errors
+      console.error('Registration error:', error.message);
+    }
+
+    handleClose();
   };
 
   const resetErrorMessage = () => {
     setTimeout(() => {
       setError('');
     }, 1500);
-    return;
-  }
+  };
 
   const handleClose = () => {
     navigation.navigate('LandingPage');
@@ -61,40 +67,35 @@ const RegisterScreen = ({ navigation }) => {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          value={firstName}
-          onChangeText={setFirstName}
-          placeholder="First Name"
+          value={displayName}
+          onChangeText={setDisplayName}
+          placeholder="Display Name"
         />
         <TextInput
           style={styles.input}
-          value={lastName}
-          onChangeText={setLastName}
-          placeholder="Last Name"
-        />
-        <TextInput
-          style={styles.input}
-          value={username}
-          onChangeText={setUsername}
-          placeholder="Username"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Email"
+          keyboardType="email-address"
         />
         <TextInput
           style={styles.input}
           value={password}
           onChangeText={setPassword}
           placeholder="Password"
-          secureTextEntry
+          //secureTextEntry
         />
         <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
         <View style={styles.errorContainer}>
           {error !== '' && <Text style={styles.errorText}>{error}</Text>}
-          {error === '' && <Text style={styles.errorText}></Text>}
+        </View>
       </View>
-      </View>
-      </KeyboardAwareScrollView>
+    </KeyboardAwareScrollView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
