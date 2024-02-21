@@ -91,6 +91,7 @@ export default function UserStack() {
               ),
             }}
           />
+          {/* Kinda defunct lets see for now
           <Tab.Screen
             name="SettingsScreenStack"
             component={SettingsScreenStack}
@@ -100,6 +101,7 @@ export default function UserStack() {
               ),
             }}
           />
+          */}
         </Tab.Navigator>
     </NavigationContainer>
   );

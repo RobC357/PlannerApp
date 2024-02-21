@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { Button } from 'react-native-elements';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 const auth = getAuth();
@@ -43,7 +44,10 @@ const ProfileScreen = () => {
       ) : (
         <Text>No user information found. Please log in.</Text>
       )}
+      <Text>{"\n"}</Text>
+      <Button title="Sign Out!" style={styles.button} onPress={() => auth.signOut()} />
     </ScrollView>
+    
   );
 };
 

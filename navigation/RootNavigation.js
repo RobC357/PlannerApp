@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, LogBox } from 'react-native';
 import { useAuthentication } from '../services/useAuthentication.js';
 import UserStack from './UserStack';
 import LoginStack from './LoginStack';
 
-export default function RootNavigation() {
+export default function RootNavigation() 
+{
+  LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message DEBUG
+  LogBox.ignoreAllLogs(); //Ignore all log notifications DEBUG
+
   const { user } = useAuthentication();
   const [loading, setLoading] = useState(true);
 
