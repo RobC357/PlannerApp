@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   StyleSheet,
+  Dimensions,
 } from "react-native";
 
 const LandingPageScreen = ({ navigation }) => {
@@ -19,7 +20,7 @@ const LandingPageScreen = ({ navigation }) => {
   return (
     <View style={styles.outerContainer}>
       <ImageBackground
-        source={require("../../images/testImage.png")}
+        source={require("../../images/landingPageImage.png")}
         resizeMode="cover"
         style={styles.fullScreenBackground}
       >
@@ -50,17 +51,17 @@ const LandingPageScreen = ({ navigation }) => {
   );
 };
 
+const { width, height } = Dimensions.get("window"); // Get the dimensions of the device's screen
+
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   innerContainer: {
-    marginLeft: "20%",
-    marginRight: "20%",
-    marginTop: "40%",
-    marginBottom: "40%",
+    marginLeft: width * 0.2, // Use percentages of the screen's width and height for margins
+    marginRight: width * 0.2,
+    marginTop: height * 0.4,
+    marginBottom: height * 0.4,
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -71,39 +72,39 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   title: {
-    fontSize: 16,
+    fontSize: width * 0.04, // Adjust font size based on screen width
     fontWeight: "bold",
     color: "black",
-    lineHeight: 20,
+    lineHeight: height * 0.03, // Adjust line height based on screen height
   },
   buttonsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "80%",
+    width: width * 0.8, // Use percentages of the screen's width for button width
   },
   button: {
     backgroundColor: "dodgerblue",
-    padding: 10,
-    borderRadius: 8,
-    marginVertical: 10,
-    width: (300 * 0.8 - 10) / 2, // Calculates button width dynamically based on the inner container's width
+    padding: width * 0.02, // Adjust padding based on screen width
+    borderRadius: width * 0.02, // Adjust border radius based on screen width
+    marginVertical: height * 0.02, // Adjust margin based on screen height
+    width: (width * 0.8 - width * 0.02) / 2, // Calculates button width dynamically based on the screen width
   },
   leftButton: {
-    marginRight: 10,
+    marginRight: width * 0.02,
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: width * 0.04, // Adjust font size based on screen width
     textAlign: "center",
   },
   tripEasyText: {
     fontWeight: "bold",
-    fontSize: 52,
+    fontSize: width * 0.13,
     color: "black",
   },
   titleContainer: {
     alignItems: "center",
-    marginBottom: "60%",
+    marginBottom: height * 0.06,
   },
 });
 
