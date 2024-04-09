@@ -1,10 +1,10 @@
 # TripEasy
 
-A Cross-platform application for trip and holiday planning based on ChatGPT
+A Cross-platform application for trip and holiday planning with AI
 
 ## Goal
 
-To create an exciting organizer web application along with Artificial-Intelligence (AI) to be specific ChatGPT to help users or clients suggest most-effective and efficient travel itineraries. One of the other aims is to improve travel arrangement process, efficient route selection and map users with real-time data of flights.
+To create an exciting organizer web application along with Artificial-Intelligence (AI) to be specific model to help users or clients suggest most-effective and efficient travel itineraries. One of the other aims is to improve travel arrangement process, efficient route selection and map users with real-time data of flights.
 
 ## Installation
 
@@ -30,6 +30,14 @@ If you cannot connect your device to expo go, try doing `npx expo start --clear`
 If it still does not work, try tunneling it with `npx expo start --tunnel`
 
 This app uses Firebase, so create a user login with your email.
+
+**Update:* Since Express is now being used with Axios, the Express server must be started seperately. To do this, 
+
+The user must create another terminal instance in VS Code, this can be done by right clicking on server.js and click on `Open in Intergrated Terminal`.
+
+After that, run `node server.js` to start the server. Then open the app normally. The server runs on port 3000.
+
+*Don't forget to `npm install` as always!*
 
 ## Members
 

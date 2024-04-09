@@ -93,21 +93,21 @@ export default function UserStack() {
           }}
         />
         <Tab.Screen
-          name="ProfileScreenStack"
-          component={ProfileScreenStack}
-          options={{
-            tabBarShowLabel: false, tabBarIcon: ({ color, size }) => (
-              <AntDesign name="user" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tab.Screen
           name="FlightScreenStack"
           component={FlightScreenStack}
           options={{
             tabBarShowLabel: false,
             tabBarIcon: ({ color, size }) => (
               <FontAwesome5 name="plane" size={size} color={color} solid={false} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="ProfileScreenStack"
+          component={ProfileScreenStack}
+          options={{
+            tabBarShowLabel: false, tabBarIcon: ({ color, size }) => (
+              <AntDesign name="user" size={size} color={color} />
             ),
           }}
         />
