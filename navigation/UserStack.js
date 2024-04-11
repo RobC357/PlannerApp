@@ -9,8 +9,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Import screens for standalone screens
 import ProfileScreen from './screens/ProfileScreen';
-import FlightScreen from './screens/FlightScreen';
 import SettingsScreen from './screens/SettingsScreen';
+
+import FlightScreen from './screens/FlightScreen';
+import FlightSearch from './screens/FlightSearch';
 
 // Import screens for search stack
 import SearchScreen from './search/SearchScreen';
@@ -66,7 +68,7 @@ const FlightScreenStack = () => {
   return (
     <Stack.Navigator screenOptions={{ animationEnabled: true, gestureEnabled: true, gestureDirection: 'horizontal' }}>
       <Stack.Screen name="Flights" component={FlightScreen} options={{ headerLeft: () => null, title: '', }} />
-
+      <Stack.Screen name="FlightSearch" component={FlightSearch} options={{ title: '', }} />
     </Stack.Navigator>
   );
 };
