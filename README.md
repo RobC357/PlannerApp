@@ -31,13 +31,15 @@ If it still does not work, try tunneling it with `npx expo start --tunnel`
 
 This app uses Firebase, so create a user login with your email.
 
-**Update:* Since Express is now being used with Axios, the Express server must be started seperately. To do this, 
+~**Update:* Since Express is now being used with Axios, the Express server must be started seperately. To do this,~
 
-The user must create another terminal instance in VS Code, this can be done by right clicking on server.js and click on `Open in Intergrated Terminal`.
+~The user must create another terminal instance in VS Code, this can be done by right clicking on server.js and click on `Open in Intergrated Terminal`.~
 
-After that, run `node server.js` to start the server. Then open the app normally. The server runs on port 3000.
+~After that, run `node server.js` to start the server. Then open the app normally. The server runs on port 3000.~
 
-*Don't forget to `npm install` as always!*
+~*Don't forget to `npm install` as always!*~
+
+**Update 2:* This is now done directly through the code, server.js will remain defunct
 
 ## Members
 

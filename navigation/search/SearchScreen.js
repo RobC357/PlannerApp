@@ -1,11 +1,74 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, Button, StyleSheet, ActivityIndicator } from 'react-native';
-import axios from 'axios';
+import { View, Text, TextInput, ScrollView, Button, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+// import axios from 'axios'; no server.js!
+
+const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 
 const SearchScreen = () => {
   const [chatHistory, setChatHistory] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const runChat = async (userInput) => {
+    const GEMINI_API_KEY = "AIzaSyCSBHH6v6EO08PvOMbJvn4K1os04SKwyUI";
+    const GEMINI_MODEL_NAME = "gemini-pro";
+    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    
+    const generationConfig = {
+      temperature: 0.9,
+      topK: 1,
+      topP: 1,
+      maxOutputTokens: 1000,
+    };
+
+    const safetySettings = [
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+    ];
+
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL_NAME });
+
+    const chat = model.startChat({
+      history: [
+        {
+          role: "user",
+          parts: [{ text: "You are a chatbot for the vacation itinerary app TripEasy. You are a friendly assistant whose job is to answer questions and give recommendations on potential vacation spots that people may have."}],
+        },
+        {
+          role: "model",
+          parts: [{ text: "Hello! Welcome to TripEasy, your one-stop solution for planning your next unforgettable vacation. As your friendly chatbot assistant, I'll be here to guide you through our wide range of destinations, help you find the perfect itinerary, and answer any questions you may have along the way. So, where are you dreaming of exploring next?"}],
+        },
+        {
+          role: "user",
+          parts: [{ text: "Do not forget this, this is the persona you will take on and you will answer all future questions as if you were a friendly chatbot assistant for TripEasy. For example, if you are asked who you are you will answer with TripEasy chatbot."}],
+        },
+        {
+          role: "model",
+          parts: [{ text: "**[TripEasy Chatbot]:** Got it! I'll keep my persona as a friendly chatbot assistant for TripEasy, ready to help you plan your dream vacation. Fire away any questions or destination requests, and I'll be here to guide you! 😊"}],
+        },
+      ],
+      generationConfig,
+      safetySettings,
+    });
+
+    const result = await chat.sendMessage(userInput);
+    const response = await result.response;
+    return response.text();
+  };
 
   const sendMessage = async () => {
     const message = userInput.trim();
@@ -15,8 +78,7 @@ const SearchScreen = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/chat', { userInput: message });
-      const botMessage = response.data.response;
+      const botMessage = await runChat(message);
 
       setChatHistory(prevHistory => ([
         ...prevHistory,
@@ -31,7 +93,7 @@ const SearchScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <Text style={styles.header}>TripEasy Chatbot</Text>
       <ScrollView style={styles.chatHistory} contentContainerStyle={{ paddingBottom: 20 }}>
         {chatHistory.map((message, index) => (
@@ -41,20 +103,24 @@ const SearchScreen = () => {
         ))}
       </ScrollView>
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.textInput}
-          value={userInput}
-          onChangeText={setUserInput}
-          placeholder="Enter your message"
-        />
-        <Button
-          title="Send"
-          onPress={sendMessage}
-          disabled={loading}
-        />
-      </View>
-      {loading && <ActivityIndicator size="large" color="#0000ff" />}
+      <TextInput
+        style={styles.textInput}
+        value={userInput}
+        onChangeText={setUserInput}
+        placeholder="Enter your message"
+        returnKeyType="done"
+        multiline={true}
+        maxHeight={100}
+        blurOnSubmit={true}
+      />
+      <Button
+        title="Send"
+        onPress={sendMessage}
+        disabled={loading}
+      />
     </View>
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
+    </KeyboardAvoidingView>
   );
 };
 
