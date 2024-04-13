@@ -19,6 +19,7 @@ import SearchScreen from './search/SearchScreen';
 
 // Import screens for saved data stack
 import SavedEntriesScreen from './savedEntries/SavedEntriesScreen';
+import ChatLogDetails from './savedEntries/ChatLogDetails';
 
 import { useAuthentication } from '../services/useAuthentication.js';
 
@@ -41,7 +42,7 @@ const SavedEntriesStack = () => {
   return (
     <Stack.Navigator screenOptions={{ animationEnabled: true, gestureEnabled: true, gestureDirection: 'horizontal' }}>
       <Stack.Screen name="SavedEntries" component={SavedEntriesScreen} options={{ headerLeft: () => null, title: '', }} />
-
+      <Stack.Screen name="ChatLogDetails" component={ChatLogDetails} options={{ title: '', }} />
     </Stack.Navigator>
   );
 };
