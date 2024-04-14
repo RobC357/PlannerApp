@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Import screens for standalone screens
 import ProfileScreen from './screens/ProfileScreen';
-import SettingsScreen from './screens/SettingsScreen';
+import MapScreen from './screens/MapScreen';
 
 import FlightScreen from './screens/FlightScreen';
 import FlightSearch from './screens/FlightSearch';
@@ -55,11 +55,11 @@ const ProfileScreenStack = () => {
     </Stack.Navigator>
   );
 };
-// Defunct?
-const SettingsScreenStack = () => {
+// Map Screen
+const MapScreenStack = () => {
   return (
     <Stack.Navigator screenOptions={{ animationEnabled: true, gestureEnabled: true, gestureDirection: 'horizontal' }}>
-      <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerLeft: () => null, title: '', }} />
+      <Stack.Screen name="Maps" component={MapScreen} options={{ headerLeft: () => null, title: '', }} />
 
     </Stack.Navigator>
   );
@@ -94,7 +94,19 @@ export default function UserStack() {
               <AntDesign name="book" size={size} color={color} />
             ),
           }}
+          
         />
+        {
+          <Tab.Screen
+            name="MapScreenStack"
+            component={MapScreenStack}
+            options={{
+              tabBarShowLabel:false, tabBarIcon: ({ color, size }) => (
+                <FontAwesome5 name="map" size={size} color={color} solid={false} />
+              ),
+            }}
+          />
+          }
         <Tab.Screen
           name="FlightScreenStack"
           component={FlightScreenStack}
@@ -114,18 +126,6 @@ export default function UserStack() {
             ),
           }}
         />
-
-        {/* Kinda defunct lets see for now
-          <Tab.Screen
-            name="SettingsScreenStack"
-            component={SettingsScreenStack}
-            options={{
-              tabBarShowLabel:false, tabBarIcon: ({ color, size }) => (
-                <AntDesign name="setting" size={size} color={color} />
-              ),
-            }}
-          />
-          */}
       </Tab.Navigator>
     </NavigationContainer>
   );
