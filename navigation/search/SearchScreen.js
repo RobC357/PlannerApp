@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, Button, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Modal, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, ScrollView, Button, StyleSheet, ActivityIndicator, 
+  KeyboardAvoidingView, Platform, Modal, TouchableOpacity, Alert, SafeAreaView  } from 'react-native';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { FontAwesome } from '@expo/vector-icons';
 
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 
@@ -11,6 +13,7 @@ const SearchScreen = () => {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [logName, setLogName] = useState('');
+  const [trashDisabled, setTrashDisabled] = useState(true);
   const auth = getAuth();
 
   const runChat = async (userInput) => {
@@ -96,6 +99,29 @@ const SearchScreen = () => {
     }
   };
 
+  const confirmClearChat = () => {
+    Alert.alert(
+      'Confirmation',
+      'Are you sure you want to clear the chat history?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Clear',
+          onPress: clearChatHistory
+        }
+      ]
+    );
+  };
+
+  const clearChatHistory = () => {
+    setChatHistory([]);
+    setUserInput('');
+    setTrashDisabled(true); // Disable trash button after clearing chat history
+  };
+
   const saveChatLog = async () => {
     try {
       const user = auth.currentUser; // Retrieve the current user
@@ -125,7 +151,6 @@ const SearchScreen = () => {
     }
   };
   
-
   const handleSaveLog = () => {
     setModalVisible(true);
   };
@@ -139,63 +164,79 @@ const SearchScreen = () => {
     setModalVisible(false);
   };
 
-  return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-      <Text style={styles.header}>TripEasy Chatbot</Text>
-         <ScrollView style={styles.chatHistory} contentContainerStyle={{ paddingBottom: 20 }}>
-        {chatHistory.map((message, index) => (
-          <View key={index} style={[styles.messageContainer, message.isUser ? styles.userMessageContainer : styles.botMessageContainer]}>
-            <Text style={styles.messageText}>{message.text}</Text>
-          </View>
-        ))}
-     </ScrollView>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.textInput}
-          value={userInput}
-          onChangeText={setUserInput}
-          placeholder="Enter your message"
-          returnKeyType="done"
-          multiline={true}
-          maxHeight={100}
-          blurOnSubmit={true}
-        />
-        <Button
-          title="Send"
-          onPress={sendMessage}
-          disabled={loading}
-        />
-        <Button
-          title="Save Log"
-          onPress={handleSaveLog}
-          disabled={loading || chatHistory.length === 0}
-        />
-      </View>
-      {loading && <ActivityIndicator size="large" color="#0000ff" />}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <TextInput
-              style={styles.modalTextInput}
-              value={logName}
-              onChangeText={setLogName}
-              placeholder="Enter log name"
-            />
-            <TouchableOpacity style={styles.modalButton} onPress={handleSaveLogConfirm}>
-              <Text>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={handleCancelSaveLog}>
-              <Text>Cancel</Text>
-            </TouchableOpacity>
-          </View>
+  const handleTrashIconPress = () => {
+    confirmClearChat();
+  };
+
+  useEffect(() => {
+    setTrashDisabled(chatHistory.length === 0);
+  }, [chatHistory]);
+
+   return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+        <Text style={styles.header}>TripEasy Chatbot</Text>
+        <ScrollView style={styles.chatHistory} contentContainerStyle={{ paddingBottom: 20 }}>
+          {chatHistory.map((message, index) => (
+            <View key={index} style={[styles.messageContainer, message.isUser ? styles.userMessageContainer : styles.botMessageContainer]}>
+              <Text style={styles.messageText}>{message.text}</Text>
+            </View>
+          ))}
+        </ScrollView>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.textInput}
+            value={userInput}
+            onChangeText={setUserInput}
+            placeholder="Enter your message"
+            returnKeyType="done"
+            multiline={true}
+            maxHeight={100}
+            blurOnSubmit={true}
+          />
+          <Button
+            title="Send"
+            onPress={sendMessage}
+            disabled={loading}
+          />
+          <Button
+            title="Save Log"
+            onPress={handleSaveLog}
+            disabled={loading || chatHistory.length === 0}
+          />
+          <TouchableOpacity
+            onPress={trashDisabled ? null : handleTrashIconPress}
+            disabled={trashDisabled}
+          >
+            <FontAwesome name="trash" size={24} color={trashDisabled ? 'gray' : 'black'} />
+          </TouchableOpacity>
         </View>
-      </Modal>
-    </KeyboardAvoidingView>
+        {loading && <ActivityIndicator size="large" color="#0000ff" />}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TextInput
+                style={styles.modalTextInput}
+                value={logName}
+                onChangeText={setLogName}
+                placeholder="Enter log name"
+              />
+              <TouchableOpacity style={styles.modalButton} onPress={handleSaveLogConfirm}>
+                <Text>Save</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalButton} onPress={handleCancelSaveLog}>
+                <Text>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

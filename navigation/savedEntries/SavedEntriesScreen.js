@@ -1,70 +1,92 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Animated, FlatList, Image } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 
 const auth = getAuth();
 const firestore = getFirestore();
 
+const MapImage = ({ latitude, longitude }) => {
+  if (!latitude || !longitude) {
+    return <Text>No location data</Text>;
+  }
+
+  const API_KEY = 'AIzaSyD_04TRnFkDE5khuHI75Cw7dzpbiuq_oGQ'; 
+  const imageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=12&size=400x400&markers=color:red|${latitude},${longitude}&key=${API_KEY}`;
+
+  return <Image source={{ uri: imageUrl }} style={{ width: 100, height: 100 }} />;
+};
+
 const SavedEntriesScreen = () => {
   const navigation = useNavigation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedTab, setSelectedTab] = useState('Chatbot'); // Default selected tab
+  const [selectedTab, setSelectedTab] = useState('Chatbot');
   const [savedEntries, setSavedEntries] = useState([]);
+  const [markers, setMarkers] = useState([]);
   const [error, setError] = useState(null);
   const [fadeAnim] = useState(new Animated.Value(0));
 
   useEffect(() => {
-    console.log("Starting auth state change listener");
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log("Auth state changed:", user);
       if (user) {
-        console.log("User UID:", user.uid); // Print user UID
         setUser(user);
         await fetchSavedEntries(user.uid);
+        await fetchMarkers(user.uid);
       } else {
         setUser(null);
-        setSavedEntries([]); // Clear saved entries if user is not authenticated
-        setLoading(false); // Ensure loading state is set to false when user is not authenticated
+        setSavedEntries([]);
+        setMarkers([]);
+        setLoading(false);
       }
     });
-  
-    // Cleanup subscription when component unmounts
-    return () => {
-      console.log("Unsubscribing from auth state change listener");
-      unsubscribe();
-    };
+
+    return () => unsubscribe();
   }, []);
 
   useFocusEffect(
     React.useCallback(() => {
-      if (user) {
-        setLoading(true); // Set loading state to true before fetching entries
+      if (user && selectedTab === 'Chatbot') {
+        setLoading(true);
         fetchSavedEntries(user.uid);
+      } else if (user && (selectedTab === 'Flights' || selectedTab === 'Markers')) {
+        setLoading(true);
+        fetchMarkers(user.uid);
       }
     }, [user, selectedTab])
   );
 
-  // Function to fetch saved entries from Firestore
   const fetchSavedEntries = async (userId) => {
     try {
       const entriesRef = collection(firestore, 'chatLogs');
       const snapshot = await getDocs(entriesRef);
       const entriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Filter entries based on user ID
       const userEntries = entriesData.filter(entry => entry.userUID === userId);
-      // Sort entries by timestamp from earliest to latest
       const sortedEntries = userEntries.sort((a, b) => a.timestamp.toDate() - b.timestamp.toDate());
       setSavedEntries(sortedEntries);
-      setError(null); // Reset error state if fetching is successful
+      setError(null);
     } catch (error) {
       console.error('Error fetching saved entries: ', error);
-      setError('Error fetching saved entries'); // Set error state if fetching fails
+      setError('Error fetching saved entries');
     } finally {
-      setLoading(false); // Ensure loading state is set to false after fetching completes
+      setLoading(false);
+    }
+  };
+
+  const fetchMarkers = async (userId) => {
+    try {
+      const markersRef = collection(firestore, 'markers');
+      const snapshot = await getDocs(markersRef);
+      const markersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setMarkers(markersData);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching markers: ', error);
+      setError('Error fetching markers');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,25 +102,37 @@ const SavedEntriesScreen = () => {
     ).start();
   }, [fadeAnim]);
 
-  // Function to switch between tabs
   const handleTabChange = tab => {
     setSelectedTab(tab);
   };
 
-  // Function to navigate to chat log details screen
   const handleEntryPress = (entry) => {
-    // Pass the selected entry to the chat log details screen
     navigation.navigate('ChatLogDetails', { entry });
   };
 
-  // Function to delete an entry
+  const handleMarkerPress = (latitude, longitude) => {
+    navigation.navigate('MapScreen', {
+      latitude,
+      longitude,
+      isMarkerNavigation: true
+    });
+  };
+
   const deleteEntry = async (entryId) => {
     try {
       await deleteDoc(doc(firestore, 'chatLogs', entryId));
-      // Remove the entry from the savedEntries state
       setSavedEntries(prevEntries => prevEntries.filter(entry => entry.id !== entryId));
     } catch (error) {
       console.error('Error deleting entry: ', error);
+    }
+  };
+
+  const deleteMarker = async (markerId) => {
+    try {
+      await deleteDoc(doc(firestore, 'markers', markerId));
+      setMarkers(prevMarkers => prevMarkers.filter(marker => marker.id !== markerId));
+    } catch (error) {
+      console.error('Error deleting marker: ', error);
     }
   };
   
@@ -119,23 +153,6 @@ const SavedEntriesScreen = () => {
           </Animated.View>
         );
       }}
-      renderLeftActions={(progress, dragX) => {
-        const scale = dragX.interpolate({
-          inputRange: [0, 100],
-          outputRange: [0.5, 1],
-          extrapolate: 'clamp',
-        });
-        return (
-          <Animated.View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', transform: [{ scale }] }}>
-            <TouchableOpacity style={styles.undoButton} onPress={() => console.log("Undo")}>
-              <Text style={styles.undoButtonText}>Undo</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        );
-      }}
-      friction={1}
-      tension={30}
-      onSwipeableWillClose={() => console.log("Swipeable is closing")}
     >
       <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({ inputRange: [0, 1], outputRange: [-20 * index, 0] }) }] }}>
         <TouchableOpacity onPress={() => handleEntryPress(item)} style={styles.entry}>
@@ -144,6 +161,40 @@ const SavedEntriesScreen = () => {
           <Text style={styles.entryChatLength}>Chat Length: {item.chat.length}</Text>
         </TouchableOpacity>
       </Animated.View>
+    </Swipeable>
+  );
+
+  const renderSwipeableMarkerItem = ({ item, index }) => (
+    <Swipeable
+      overshootRight={false}
+      renderRightActions={(progress, dragX) => {
+        const scale = dragX.interpolate({
+          inputRange: [-100, 0],
+          outputRange: [1, 0.5],
+          extrapolate: 'clamp',
+        });
+        return (
+          <Animated.View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', transform: [{ scale }] }}>
+            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteMarker(item.id)}>
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        );
+      }}
+    >
+      <TouchableOpacity onPress={() => handleMarkerPress(item.latitude, item.longitude)} style={styles.marker}>
+        <View style={styles.markerContent}>
+          <View style={styles.mapContainer}>
+            <MapImage latitude={item.latitude} longitude={item.longitude} />
+          </View>
+          <View style={styles.detailsContainer}>
+            <Text style={styles.addressText}>{item.address}</Text>
+            <Text style={styles.timestampText}>
+              Added on: {item.timestamp.toDate().toLocaleString()}
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
     </Swipeable>
   );
 
@@ -160,26 +211,40 @@ const SavedEntriesScreen = () => {
           onPress={() => handleTabChange('Flights')}>
           <Text style={styles.tabText}>Flights</Text>
         </TouchableOpacity>
-        {/* Add more tabs as needed */}
+        <TouchableOpacity
+          style={[styles.tab, selectedTab === 'Markers' && styles.selectedTab]}
+          onPress={() => handleTabChange('Markers')}>
+          <Text style={styles.tabText}>Markers</Text>
+        </TouchableOpacity>
       </View>
       {loading ? (
         <ActivityIndicator style={styles.loadingIndicator} size="large" color="#0000ff" />
-      ) : error ? (
-        <Text style={styles.errorText}>{error}</Text>
-      ) : selectedTab === 'Chatbot' ? (
+      ) : (
         <>
-          {savedEntries.length === 0 ? (
-            <Text style={styles.noEntriesText}>No chat logs found</Text>
+          {selectedTab === 'Chatbot' ? (
+            savedEntries.length > 0 ? (
+              <FlatList
+                data={savedEntries}
+                renderItem={renderSwipeableItem}
+                keyExtractor={item => item.id}
+              />
+            ) : (
+              <Text style={styles.noEntriesText}>No chatlogs found</Text>
+            )
+          ) : selectedTab === 'Flights' ? (
+            <Text style={styles.noEntriesText}>No flights saved</Text>
           ) : (
-            <FlatList
-            data={savedEntries}
-            renderItem={renderSwipeableItem}
-            keyExtractor={item => item.id}
-          />
+            markers.length > 0 ? (
+              <FlatList
+                data={markers.sort((a, b) => a.timestamp.toDate() - b.timestamp.toDate())}
+                renderItem={renderSwipeableMarkerItem}
+                keyExtractor={item => item.id}
+              />
+            ) : (
+              <Text style={styles.noEntriesText}>No markers found</Text>
+            )
           )}
         </>
-      ) : (
-        <Text style={styles.noEntriesText}>No flights saved</Text>
       )}
     </View>
   );
@@ -209,23 +274,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  entriesContainer: {
-    flexGrow: 1,
-    padding: 20,
-  },
   loadingIndicator: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  errorText: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    textAlign: 'center',
-    marginTop: 20,
-    fontSize: 16,
-    color: 'red',
   },
   entry: {
     backgroundColor: '#f0f0f0',
@@ -251,15 +303,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'gray',
   },
+  marker: {
+    marginBottom: 10,
+  },
+  markerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  mapContainer: {
+    marginRight: 10,
+  },
+  detailsContainer: {
+    flex: 1,
+  },
+  addressText: {
+    fontSize: 16,
+  },
+  timestampText: {
+    fontSize: 14,
+    color: 'gray',
+    marginTop: 5,
+  },
   deleteButton: {
     backgroundColor: 'red',
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
-    height: '100%',
+    marginRight: 10,
+    paddingVertical: 10,
   },
   deleteButtonText: {
     color: 'white',
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });

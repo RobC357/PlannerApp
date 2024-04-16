@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -6,19 +6,10 @@ import {
   ImageBackground,
   StyleSheet,
   Dimensions,
-  ActivityIndicator,
+  StatusBar,
 } from "react-native";
 
 const LandingPageScreen = ({ navigation }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  // Simulating page loading with setTimeout
-  useLayoutEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsLoading(false); // Set to false after timeout
-    }, 3000); // Simulate a 3-second loading time
-
-    return () => clearTimeout(timeout); // Clean up the timeout
-  }, []);
 
   const handleLogin = () => {
     navigation.navigate("Login");
@@ -30,42 +21,37 @@ const LandingPageScreen = ({ navigation }) => {
 
   return (
     <View style={styles.outerContainer}>
-      {isLoading ? (
-        <ActivityIndicator
-          size="large"
-          color="dodgerblue"
-          style={styles.loadingIndicator}
-        />
-      ) : (
-        <ImageBackground
-          source={require("../../images/landingPageImage.png")}
-          resizeMode="cover"
-          style={styles.fullScreenBackground}
-        >
-          <View style={styles.innerContainer}>
-            <View style={styles.titleContainer}>
-              <Text style={styles.title}>Welcome to</Text>
-              <Text style={styles.tripEasyText}>TripEasy</Text>
-            </View>
-            <View style={styles.buttonsRow}>
-              <TouchableOpacity
-                style={[styles.button, styles.leftButton]}
-                onPress={handleLogin}
-                accessibilityLabel="Log in"
-              >
-                <Text style={styles.buttonText}>Login</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleRegister}
-                accessibilityLabel="Register"
-              >
-                <Text style={styles.buttonText}>Register</Text>
-              </TouchableOpacity>
-            </View>
+       <React.Fragment>
+      <StatusBar barStyle="dark-content" />
+      <ImageBackground
+        source={require("../../images/landingPageImage.png")}
+        resizeMode="cover"
+        style={styles.fullScreenBackground}
+      >
+        <View style={styles.innerContainer}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Welcome to</Text>
+            <Text style={styles.tripEasyText}>TripEasy</Text>
           </View>
-        </ImageBackground>
-      )}
+          <View style={styles.buttonsRow}>
+            <TouchableOpacity
+              style={[styles.button, styles.leftButton]}
+              onPress={handleLogin}
+              accessibilityLabel="Log in"
+            >
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleRegister}
+              accessibilityLabel="Register"
+            >
+              <Text style={styles.buttonText}>Register</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ImageBackground>
+      </React.Fragment>
     </View>
   );
 };
@@ -124,12 +110,6 @@ const styles = StyleSheet.create({
   titleContainer: {
     alignItems: "center",
     marginBottom: height * 0.06,
-  },
-  loadingIndicator: {
-    position: "absolute",
-    top: height / 2,
-    left: width / 2,
-    transform: [{ translateX: -15 }, { translateY: -15 }],
   },
 });
 

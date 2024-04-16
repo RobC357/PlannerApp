@@ -59,7 +59,7 @@ const ProfileScreenStack = () => {
 const MapScreenStack = () => {
   return (
     <Stack.Navigator screenOptions={{ animationEnabled: true, gestureEnabled: true, gestureDirection: 'horizontal' }}>
-      <Stack.Screen name="Maps" component={MapScreen} options={{ headerLeft: () => null, title: '', }} />
+      <Stack.Screen name="MapScreen" component={MapScreen} options={{ headerLeft: () => null, title: '', }} />
 
     </Stack.Navigator>
   );
@@ -75,58 +75,60 @@ const FlightScreenStack = () => {
 };
 export default function UserStack() {
   return (
-    <NavigationContainer>
-      <Tab.Navigator initialRouteName="SearchStack" screenOptions={{ headerShown: false, animationEnabled: true }}>
-        <Tab.Screen
-          name="SearchStack"
-          component={SearchStack}
-          options={{
-            tabBarShowLabel: false, tabBarIcon: ({ color, size }) => (
-              <AntDesign name="search1" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="SavedEntriesStack"
-          component={SavedEntriesStack}
-          options={{
-            tabBarShowLabel: false, tabBarIcon: ({ color, size }) => (
-              <AntDesign name="book" size={size} color={color} />
-            ),
-          }}
-          
-        />
-        {
+    <React.Fragment>
+      <StatusBar barStyle="dark-content" />
+      <NavigationContainer>
+        <Tab.Navigator initialRouteName="SearchStack" screenOptions={{ headerShown: false, animationEnabled: true , tabBarActiveTintColor: 'dodgerblue', tabBarInactiveTintColor: 'grey',}}>
           <Tab.Screen
-            name="MapScreenStack"
-            component={MapScreenStack}
+            name="SearchStack"
+            component={SearchStack}
             options={{
-              tabBarShowLabel:false, tabBarIcon: ({ color, size }) => (
-                <FontAwesome5 name="map" size={size} color={color} solid={false} />
+              tabBarShowLabel: false, tabBarIcon: ({ color, size }) => (
+                <AntDesign name="search1" size={size} color={color} />
               ),
             }}
           />
+          <Tab.Screen
+            name="SavedEntriesStack"
+            component={SavedEntriesStack}
+            options={{
+              tabBarShowLabel: false, tabBarIcon: ({ color, size }) => (
+                <AntDesign name="book" size={size} color={color} />
+              ),
+            }}
+          />
+          {
+            <Tab.Screen
+              name="MapScreenStack"
+              component={MapScreenStack}
+              options={{
+                tabBarShowLabel:false, tabBarIcon: ({ color, size }) => (
+                  <FontAwesome5 name="map" size={size} color={color} solid={false} />
+                ),
+              }}
+            />
           }
-        <Tab.Screen
-          name="FlightScreenStack"
-          component={FlightScreenStack}
-          options={{
-            tabBarShowLabel: false,
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome5 name="plane" size={size} color={color} solid={false} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="ProfileScreenStack"
-          component={ProfileScreenStack}
-          options={{
-            tabBarShowLabel: false, tabBarIcon: ({ color, size }) => (
-              <AntDesign name="user" size={size} color={color} />
-            ),
-          }}
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
+          <Tab.Screen
+            name="FlightScreenStack"
+            component={FlightScreenStack}
+            options={{
+              tabBarShowLabel: false,
+              tabBarIcon: ({ color, size }) => (
+                <FontAwesome5 name="plane" size={size} color={color} solid={false} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="ProfileScreenStack"
+            component={ProfileScreenStack}
+            options={{
+              tabBarShowLabel: false, tabBarIcon: ({ color, size }) => (
+                <AntDesign name="user" size={size} color={color} />
+              ),
+            }}
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </React.Fragment>
   );
 }
