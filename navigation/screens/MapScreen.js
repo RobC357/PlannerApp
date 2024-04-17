@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Alert, Animated } from 'react-native';
+import { View, StyleSheet, Alert, Animated, TouchableOpacity } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useFocusEffect } from '@react-navigation/native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -7,6 +7,7 @@ import * as Location from "expo-location";
 import Geocoder from 'react-native-geocoding';
 import { getFirestore, collection, addDoc, getDocs , serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { FontAwesome } from '@expo/vector-icons';
 
 Geocoder.init("AIzaSyD_04TRnFkDE5khuHI75Cw7dzpbiuq_oGQ");
 
@@ -249,6 +250,27 @@ const MapScreen = ( { route } ) => {
     }
   };
 
+  const handleCurrentLocationPress = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission denied', 'Please enable location services to use this feature.');
+        return;
+      }
+      let location = await Location.getLastKnownPositionAsync({});
+      const { latitude, longitude } = location.coords;
+      mapRef.current.animateToRegion({
+        latitude,
+        longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      });
+    } catch (error) {
+      console.error('Error fetching current location: ', error);
+      Alert.alert('Error', 'Could not fetch current location. Please try again.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -256,7 +278,7 @@ const MapScreen = ( { route } ) => {
         style={styles.map}
         provider={PROVIDER_GOOGLE}
         showsUserLocation
-        showsMyLocationButton
+        showsMyLocationButton={false}
         userLocationPriority='balanced'
         initialRegion={initialRegion}
         onPress={handleMapPress}
@@ -302,7 +324,10 @@ const MapScreen = ( { route } ) => {
             returnKeyType="done"
           />
         </View>
-      </Animated.View>
+        </Animated.View>
+        <TouchableOpacity style={styles.locationButton} onPress={handleCurrentLocationPress}>
+        <FontAwesome name="location-arrow" size={24} color="black" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -330,6 +355,18 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+  },
+  locationButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: 'white',
+    borderRadius: 50,
+    width: 50,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
   },
 });
 
