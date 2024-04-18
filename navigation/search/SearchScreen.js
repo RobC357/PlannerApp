@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, Button, StyleSheet, ActivityIndicator, 
-  KeyboardAvoidingView, Platform, Modal, TouchableOpacity, Alert, SafeAreaView  } from 'react-native';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { FontAwesome } from '@expo/vector-icons';
+import { View, Text, TextInput, ScrollView, Button, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Modal, TouchableOpacity, Alert, SafeAreaView, Keyboard } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
 
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 
@@ -172,44 +172,49 @@ const SearchScreen = () => {
     setTrashDisabled(chatHistory.length === 0);
   }, [chatHistory]);
 
-   return (
+  return (
     <SafeAreaView style={{ flex: 1 }}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-        <Text style={styles.header}>TripEasy Chatbot</Text>
-        <ScrollView style={styles.chatHistory} contentContainerStyle={{ paddingBottom: 20 }}>
-          {chatHistory.map((message, index) => (
-            <View key={index} style={[styles.messageContainer, message.isUser ? styles.userMessageContainer : styles.botMessageContainer]}>
-              <Text style={styles.messageText}>{message.text}</Text>
-            </View>
-          ))}
-        </ScrollView>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.textInput}
-            value={userInput}
-            onChangeText={setUserInput}
-            placeholder="Enter your message"
-            returnKeyType="done"
-            multiline={true}
-            maxHeight={100}
-            blurOnSubmit={true}
-          />
-          <Button
-            title="Send"
-            onPress={sendMessage}
-            disabled={loading}
-          />
-          <Button
-            title="Save Log"
-            onPress={handleSaveLog}
-            disabled={loading || chatHistory.length === 0}
-          />
-          <TouchableOpacity
-            onPress={trashDisabled ? null : handleTrashIconPress}
-            disabled={trashDisabled}
-          >
-            <FontAwesome name="trash" size={24} color={trashDisabled ? 'gray' : 'black'} />
-          </TouchableOpacity>
+      <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        extraScrollHeight={Platform.select({ ios: 50, android: 0 })}
+        enableOnAndroid={true}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.container}>
+          <Text style={styles.header}>TripEasy Chatbot</Text>
+          <ScrollView style={styles.chatHistory} contentContainerStyle={{ paddingBottom: 20 }}>
+            {chatHistory.map((message, index) => (
+              <View key={index} style={[styles.messageContainer, message.isUser ? styles.userMessageContainer : styles.botMessageContainer]}>
+                <Text style={styles.messageText}>{message.text}</Text>
+              </View>
+            ))}
+          </ScrollView>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.textInput}
+              value={userInput}
+              onChangeText={setUserInput}
+              placeholder="Enter your message"
+              returnKeyType="done"
+              blurOnSubmit={true}
+            />
+            <Button
+              title="Send"
+              onPress={sendMessage}
+              disabled={loading}
+            />
+            <Button
+              title="Save Log"
+              onPress={handleSaveLog}
+              disabled={loading || chatHistory.length === 0}
+            />
+            <TouchableOpacity
+              onPress={trashDisabled ? null : handleTrashIconPress}
+              disabled={trashDisabled}
+            >
+              <FontAwesome name="trash" size={24} color={trashDisabled ? 'gray' : 'black'} />
+            </TouchableOpacity>
+          </View>
         </View>
         {loading && <ActivityIndicator size="large" color="#0000ff" />}
         <Modal
@@ -235,7 +240,7 @@ const SearchScreen = () => {
             </View>
           </View>
         </Modal>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };
