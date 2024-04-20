@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Button, TouchableOpacity, Dimensions, Image, Modal, TouchableWithoutFeedback } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import moment from 'moment';
 import axios from 'axios';
 
 const FlightSearch = () => {
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const [flights, setFlights] = useState([]);
   const [departureDate, setDepartureDate] = useState(new Date().toISOString().split('T')[0]);
@@ -26,17 +28,6 @@ const FlightSearch = () => {
     setCardWidth(calculatedCardWidth);
   }, []);
 
-  // Function to retrieve nearby airports based on coordinates
-  const getNearbyAirports = async (latitude, longitude) => {
-    try {
-      const response = await axios.get(`https://example.com/api/airports?lat=${latitude}&lng=${longitude}&radius=50`);
-      return response.data.airports;
-    } catch (error) {
-      console.error('Error fetching nearby airports:', error);
-      return [];
-    }
-  };
-
   // Function to search for flights
   const searchFlights = async () => {
     setLoading(true);
@@ -49,10 +40,11 @@ const FlightSearch = () => {
           api_key: '32a22720e066e5d948a13183ce32715e8008f02c3cb67ced3b623ef2e02e9175',
           engine: 'google_flights',
           departure_id: "JFK",
-          arrival_id: "LHR",
+          arrival_id: "ROC",
           currency: 'USD',
-          outbound_date: "2024-04-29",
-          return_date: "2024-04-30",
+          travel_class: 1,
+          outbound_date: "2024-05-26",
+          return_date: "2024-05-26",
           // Add additional parameters if needed
         }
       });
@@ -85,33 +77,55 @@ const FlightSearch = () => {
     setArrivalAirportOptions(airports);
   };
 
+  // Navigate to details screen with flight details
+  const goToFlightDetails = (flightDetails) => {
+    navigation.navigate('FlightDetails', { flightDetails }); 
+  };
+
   // Flight card rendering function
-  const renderFlightCard = ({ item }) => (
-    <TouchableOpacity onPress={() => goToFlightDetails(item.departure_token)}>
-      <View style={[styles.cardContainer , {width: cardWidth}]}>
-        <View style={styles.card}>
+  const renderFlightCard = ({ item }) => {
+    const departureTime = moment(item.flights[0].departure_airport.time).format('h:mm A');
+    const arrivalTime = moment(item.flights[0].arrival_airport.time).format('h:mm A');
+    
+    return (
+      <TouchableOpacity onPress={() => goToFlightDetails(item)}>
+        <View style={[styles.cardContainer, { width: cardWidth }]}>
           <Image
             source={{ uri: item.airline_logo }}
             style={styles.cardImage}
             resizeMode="cover"
           />
-          <View style={styles.cardContent}>
-            <Text style={styles.cardText}>Airline: {item.flights[0].airline}</Text>
-            <Text style={styles.cardText}>Flight Number: {item.flights[0].flight_number}</Text>
-            <Text style={styles.cardText}>Departure Airport: {item.flights[0].departure_airport.name}</Text>
-            <Text style={styles.cardText}>Departure Time: {moment(item.flights[0].departure_airport.time).format('YYYY-MM-DD HH:mm')}</Text>
-            <Text style={styles.cardText}>Arrival Airport: {item.flights[0].arrival_airport.name}</Text>
-            <Text style={styles.cardText}>Arrival Time: {moment(item.flights[0].arrival_airport.time).format('YYYY-MM-DD HH:mm')}</Text>
-            <Text style={styles.cardText}>Duration: {item.total_duration} minutes</Text>
-            <Text style={styles.cardText}>Airplane: {item.flights[0].airplane}</Text>
-            <Text style={styles.cardText}>Travel Class: {item.flights[0].travel_class}</Text>
-            <Text style={styles.cardText}>Price: ${item.price}</Text>
+          <View style={styles.overlay}>
+            <Text style={styles.overlayText}>Flight Number: {item.flights[0].flight_number}</Text>
+            <View style={styles.airportContainer}>
+              <Text style={styles.overlayText}>Departure Airport:</Text>
+              <Text style={[styles.overlayText, styles.airportName]}>{item.flights[0].departure_airport.name}</Text>
+            </View>
+            <View style={styles.airportContainer}>
+              <Text style={styles.overlayText}>Arrival Airport:</Text>
+              <Text style={[styles.overlayText, styles.airportName]}>{item.flights[0].arrival_airport.name}</Text>
+            </View>
+            <View style={styles.timeContainer}>
+              <FontAwesome5 name="plane-departure" size={20} color="#007bff" />
+              <Text style={styles.time}>{departureTime}</Text>
+              <View style={styles.arrowContainer}>
+                <FontAwesome5 name="long-arrow-alt-right" size={20} color="#007bff" style={styles.arrow} />
+              </View>
+              <FontAwesome5 name="plane-arrival" size={20} color="#007bff" />
+              <Text style={styles.time}>{arrivalTime}</Text>
+            </View>
+            <View>
+            <Text style={styles.bottomRow}>Travel Class: {item.flights[0].travel_class}</Text>
+            </View>
+            <View style={styles.bottomRow}>
+              <Text style={styles.bottomRowText}>Duration: {Math.floor(item.total_duration / 60)}h {item.total_duration % 60}m</Text>
+              <Text style={styles.bottomRowText}>Price: ${item.price}</Text>
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
-  
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -322,29 +336,28 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     marginVertical: 8,
-    justifyContent: 'center',
-    alignSelf: 'stretch', // Make card container take full width
+    alignSelf: 'stretch',
   },
   card: {
-    flexDirection: 'row', // Arrange image and content horizontally
+    flexDirection: 'row',
     padding: 8,
-    backgroundColor: '#f9f9f9',
-    borderColor: '#ddd',
-    borderWidth: 1,
+    backgroundColor: '#F5F5F5',
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0', 
   },
   cardContent: {
-    flex: 1, // Take remaining space
+    flex: 1,
     justifyContent: 'center',
-    marginLeft: 8, // Add margin between image and content
+    marginLeft: 8, 
   },
   cardText: {
-    fontSize: 14, // Decrease font size for a more compact look
-    marginBottom: 4, // Reduce margin between text lines
+    fontSize: 14, 
+    marginBottom: 4, 
   },
   cardImage: {
-    width: 100, // Set a fixed width for the image
-    height: 100, // Set a fixed height for the image
+    width: 100,
+    height: 100,
     borderRadius: 8,
   },
   autocompleteContainer: {
@@ -358,6 +371,38 @@ const styles = StyleSheet.create({
   },
   dateContainer: {
     marginBottom: 20,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 5,
+    paddingVertical: 5,
+  },
+  bottomRowText: {
+    fontSize: 13,
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  time: {
+    marginLeft: 5,
+    marginRight: 5,
+  },
+  arrowContainer: {
+    paddingHorizontal: 5,
+  },
+  airportContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 5,
+  },
+  airportName: {
+    flex: 1,
+    marginLeft: 5,
+    marginRight: 5, 
+    flexWrap: 'wrap',
   },
 });
 

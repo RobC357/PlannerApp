@@ -12,7 +12,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import MapScreen from './screens/MapScreen';
 
 import FlightScreen from './screens/FlightScreen';
-import FlightSearch from './screens/FlightSearch';
+import FlightDetails from './screens/FlightDetails';
 
 // Import screens for search stack
 import SearchScreen from './search/SearchScreen';
@@ -69,7 +69,7 @@ const FlightScreenStack = () => {
   return (
     <Stack.Navigator screenOptions={{ animationEnabled: true, gestureEnabled: true, gestureDirection: 'horizontal' }}>
       <Stack.Screen name="Flights" component={FlightScreen} options={{ headerLeft: () => null, title: '', }} />
-      <Stack.Screen name="FlightSearch" component={FlightSearch} options={{ title: '', }} />
+      <Stack.Screen name="FlightDetails" component={FlightDetails} options={{ title: '', }} />
     </Stack.Navigator>
   );
 };

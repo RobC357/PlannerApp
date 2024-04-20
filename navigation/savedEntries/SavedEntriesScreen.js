@@ -26,6 +26,7 @@ const SavedEntriesScreen = () => {
   const [selectedTab, setSelectedTab] = useState('Chatbot');
   const [savedEntries, setSavedEntries] = useState([]);
   const [markers, setMarkers] = useState([]);
+  const [flights, setFlights] = useState([]);
   const [error, setError] = useState(null);
   const [fadeAnim] = useState(new Animated.Value(0));
 
@@ -34,10 +35,12 @@ const SavedEntriesScreen = () => {
       if (user) {
         setUser(user);
         await fetchSavedEntries(user.uid);
+        await fetchFlights(user.uid);
         await fetchMarkers(user.uid);
       } else {
         setUser(null);
         setSavedEntries([]);
+        setFlights([]);
         setMarkers([]);
         setLoading(false);
       }
@@ -51,7 +54,10 @@ const SavedEntriesScreen = () => {
       if (user && selectedTab === 'Chatbot') {
         setLoading(true);
         fetchSavedEntries(user.uid);
-      } else if (user && (selectedTab === 'Flights' || selectedTab === 'Markers')) {
+      } else if (user && selectedTab === 'Flights') {
+        setLoading(true);
+        fetchFlights(user.uid);
+      } else if (user && selectedTab === 'Markers') {
         setLoading(true);
         fetchMarkers(user.uid);
       }
@@ -70,6 +76,21 @@ const SavedEntriesScreen = () => {
     } catch (error) {
       console.error('Error fetching saved entries: ', error);
       setError('Error fetching saved entries');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFlights = async () => {
+    try {
+      const flightsRef = collection(firestore, 'flights');
+      const querySnapshot = await getDocs(flightsRef);
+      const flightsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setFlights(flightsData);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching flights: ', error);
+      setError('Error fetching flights');
     } finally {
       setLoading(false);
     }
@@ -110,11 +131,18 @@ const SavedEntriesScreen = () => {
     navigation.navigate('ChatLogDetails', { entry });
   };
 
+  const handleFlightPress = (flightDetails) => {
+    //navigation.navigate('FlightDetails', { flightDetails }); NEED TO MAKE NEW?
+  };
+
   const handleMarkerPress = (latitude, longitude) => {
-    navigation.navigate('MapScreen', {
-      latitude,
-      longitude,
-      isMarkerNavigation: true
+    navigation.navigate('MapScreenStack', {
+      screen: 'MapScreen',
+      params: {
+        latitude,
+        longitude,
+        isMarkerNavigation: true,
+      },
     });
   };
 
@@ -124,6 +152,15 @@ const SavedEntriesScreen = () => {
       setSavedEntries(prevEntries => prevEntries.filter(entry => entry.id !== entryId));
     } catch (error) {
       console.error('Error deleting entry: ', error);
+    }
+  };
+
+  const deleteFlight = async (flightId) => {
+    try {
+      await deleteDoc(doc(firestore, 'flights', flightId));
+      setFlights(prevFlights => prevFlights.filter(flight => flight.id !== flightId));
+    } catch (error) {
+      console.error('Error deleting flight: ', error);
     }
   };
 
@@ -164,6 +201,40 @@ const SavedEntriesScreen = () => {
     </Swipeable>
   );
 
+  const renderSwipeableFlightItem = ({ item, index }) => (
+    <Swipeable
+      overshootRight={false}
+      renderRightActions={(progress, dragX) => {
+        const scale = dragX.interpolate({
+          inputRange: [-100, 0],
+          outputRange: [1, 0.5],
+          extrapolate: 'clamp',
+        });
+        return (
+          <Animated.View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', transform: [{ scale }] }}>
+            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteFlight(item.id)}>
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        );
+      }}
+    >
+      <TouchableOpacity onPress={() => handleFlightPress(item)} style={styles.entry}>
+        {/* Render flight details here */}
+        <View>
+        {item.image_url && <Image source={{ uri: item.image_url }} style={{ width: 100, height: 100 }} />}
+          <Text>Airline: {item.airline}</Text>
+          <Text>Flight Number: {item.flight_number}</Text>
+          <Text>Departure Time: {item.departure_time}</Text>
+          <Text>Arrival Time: {item.arrival_time}</Text>
+          <Text>Departure Airport: {item.departure_airport}</Text>
+          <Text>Arrival Airport: {item.arrival_airport}</Text>
+          <Text>Price: ${item.price}</Text>
+        </View>
+      </TouchableOpacity>
+    </Swipeable>
+  );
+
   const renderSwipeableMarkerItem = ({ item, index }) => (
     <Swipeable
       overshootRight={false}
@@ -200,47 +271,71 @@ const SavedEntriesScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Tab header */}
       <View style={styles.header}>
+        {/* Chatbot tab */}
         <TouchableOpacity
           style={[styles.tab, selectedTab === 'Chatbot' && styles.selectedTab]}
           onPress={() => handleTabChange('Chatbot')}>
           <Text style={styles.tabText}>Chatbot</Text>
         </TouchableOpacity>
+        {/* Flights tab */}
         <TouchableOpacity
           style={[styles.tab, selectedTab === 'Flights' && styles.selectedTab]}
           onPress={() => handleTabChange('Flights')}>
           <Text style={styles.tabText}>Flights</Text>
         </TouchableOpacity>
+        {/* Markers tab */}
         <TouchableOpacity
           style={[styles.tab, selectedTab === 'Markers' && styles.selectedTab]}
           onPress={() => handleTabChange('Markers')}>
           <Text style={styles.tabText}>Markers</Text>
         </TouchableOpacity>
       </View>
+      {/* Loading indicator or content based on selected tab */}
       {loading ? (
+        // Display loading indicator if data is being fetched
         <ActivityIndicator style={styles.loadingIndicator} size="large" color="#0000ff" />
       ) : (
         <>
+          {/* Conditional rendering based on selected tab */}
           {selectedTab === 'Chatbot' ? (
+            // Render chatlogs if 'Chatbot' tab is selected
             savedEntries.length > 0 ? (
+              // Render chatlogs if there are savedEntries
               <FlatList
                 data={savedEntries}
                 renderItem={renderSwipeableItem}
                 keyExtractor={item => item.id}
               />
             ) : (
+              // Display message if no chatlogs are found
               <Text style={styles.noEntriesText}>No chatlogs found</Text>
             )
           ) : selectedTab === 'Flights' ? (
-            <Text style={styles.noEntriesText}>No flights saved</Text>
+            // Render flight items if 'Flights' tab is selected
+            flights.length > 0 ? (
+              // Render flights if there are saved flights
+              <FlatList
+                data={flights}
+                renderItem={renderSwipeableFlightItem}
+                keyExtractor={item => item.id}
+              />
+            ) : (
+              // Display message if no flights are found
+              <Text style={styles.noEntriesText}>No flights found</Text>
+            )
           ) : (
+            // Render markers if 'Markers' tab is selected
             markers.length > 0 ? (
+              // Render markers if there are markers
               <FlatList
                 data={markers.sort((a, b) => a.timestamp.toDate() - b.timestamp.toDate())}
                 renderItem={renderSwipeableMarkerItem}
                 keyExtractor={item => item.id}
               />
             ) : (
+              // Display message if no markers are found
               <Text style={styles.noEntriesText}>No markers found</Text>
             )
           )}
