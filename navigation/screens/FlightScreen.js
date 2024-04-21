@@ -28,61 +28,125 @@ const FlightSearch = () => {
     setCardWidth(calculatedCardWidth);
   }, []);
 
-  // Function to search for flights
+  const getNearbyAirports = async (lat, lng) => {
+    try {
+      const response = await axios.get(`https://iatageo.com/getCode/${lat}/${lng}`);
+      const { IATA } = response.data;
+      console.log('IATA:', IATA);
+      return IATA;
+    } catch (error) {
+      console.error('Error fetching nearby airports:', error);
+      return null;
+    }
+  };
+
   const searchFlights = async () => {
     setLoading(true);
-    setFlights([]); // Resetting flights to empty array
+    setFlights([]);
     
     try {
-      // Construct the API request to SERP API for Google Flights
+      // Use departure and arrival IATA codes in the API request
       const response = await axios.get('https://serpapi.com/search', {
         params: {
           api_key: '32a22720e066e5d948a13183ce32715e8008f02c3cb67ced3b623ef2e02e9175',
           engine: 'google_flights',
-          departure_id: "JFK",
-          arrival_id: "ROC",
+          departure_id: departurePlaceId,
+          arrival_id: arrivalPlaceId,
           currency: 'USD',
           travel_class: 1,
-          outbound_date: "2024-05-26",
-          return_date: "2024-05-26",
-          // Add additional parameters if needed
+          outbound_date: departureDate,
+          return_date: arrivalDate,
         }
       });
-  
-      // Log the entire response to diagnose the issue
-      console.log('Flight search response:', response.data);
-  
-      // Extract flight data from the response and update state
-      const bestFlights = response.data.best_flights || []; // Default to an empty array if best_flights is not present
-      const otherFlights = response.data.other_flights || []; // Default to an empty array if other_flights is not present
-      const allFlights = [...bestFlights, ...otherFlights]; // Combine best_flights and other_flights
-      setFlights(allFlights); // Assuming response.data is the correct structure
+
+      // Extract and set flight data
+      const bestFlights = response.data.best_flights || [];
+      const otherFlights = response.data.other_flights || [];
+      const allFlights = [...bestFlights, ...otherFlights];
+      setFlights(allFlights);
     } catch (error) {
       console.error('Error fetching flights:', error);
     }
     setLoading(false);
   };
 
+  const getCoordinates = async (address) => {
+    try {
+      const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+        params: {
+          address: address,
+          key: 'AIzaSyD_04TRnFkDE5khuHI75Cw7dzpbiuq_oGQ', // Replace with your Google Geocoding API key
+        }
+      });
+  
+      // Parse the response to extract latitude and longitude
+      const { results } = response.data;
+      if (results && results.length > 0) {
+        const { geometry } = results[0];
+        if (geometry && geometry.location) {
+          const { lat, lng } = geometry.location;
+          console.log('Latitude:', lat, 'Longitude:', lng);
+          return { lat, lng };
+        } else {
+          console.error('No geometry data found in Geocoding API response');
+          return null;
+        }
+      } else {
+        console.error('No results found in Geocoding API response');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching coordinates from Geocoding API:', error);
+      return null;
+    }
+  };
+  
   const handleDepartureSelection = async (data, details = null) => {
-    setDeparturePlaceId(details.place_id);
-    const { lat, lng } = details.geometry.location;
-    const airports = await getNearbyAirports(lat, lng);
-    setDepartureAirportOptions(airports);
+    console.log('Departure details:', details);
+    if (details) {
+      const { place_id } = details;
+      console.log('Departure place_id:', place_id);
+      try {
+        const coordinates = await getCoordinates(details.description);
+        if (coordinates) {
+          console.log('Departure coordinates:', coordinates);
+          const { lat, lng } = coordinates;
+          const airportCode = await getNearbyAirports(lat, lng);
+          console.log('Departure airport code:', airportCode);
+          setDeparturePlaceId(airportCode);
+          setDepartureAirportOptions([{ place_id, airportCode }]);
+        }
+      } catch (error) {
+        console.error('Error fetching airport details for departure:', error);
+      }
+    }
   };
   
   const handleArrivalSelection = async (data, details = null) => {
-    setArrivalPlaceId(details.place_id);
-    const { lat, lng } = details.geometry.location;
-    const airports = await getNearbyAirports(lat, lng);
-    setArrivalAirportOptions(airports);
+    console.log('Arrival details:', details);
+    if (details) {
+      const { place_id } = details;
+      console.log('Arrival place_id:', place_id);
+      try {
+        const coordinates = await getCoordinates(details.description);
+        if (coordinates) {
+          console.log('Arrival coordinates:', coordinates);
+          const { lat, lng } = coordinates;
+          const airportCode = await getNearbyAirports(lat, lng);
+          console.log('Arrival airport code:', airportCode);
+          setArrivalPlaceId(airportCode);
+          setArrivalAirportOptions([{ place_id, airportCode }]);
+        }
+      } catch (error) {
+        console.error('Error fetching airport details for arrival:', error);
+      }
+    }
   };
 
-  // Navigate to details screen with flight details
   const goToFlightDetails = (flightDetails) => {
     navigation.navigate('FlightDetails', { flightDetails }); 
   };
 
-  // Flight card rendering function
   const renderFlightCard = ({ item }) => {
     const departureTime = moment(item.flights[0].departure_airport.time).format('h:mm A');
     const arrivalTime = moment(item.flights[0].arrival_airport.time).format('h:mm A');
@@ -131,7 +195,6 @@ const FlightSearch = () => {
     <View style={styles.container}>
       {/* Departure and Arrival Section */}
       <View style={styles.topSection}>
-        {/* Departure */}
         <View style={styles.locationContainer}>
           <GooglePlacesAutocomplete
             placeholder="Departure Airport"
@@ -139,7 +202,6 @@ const FlightSearch = () => {
             query={{
               key: 'AIzaSyD_04TRnFkDE5khuHI75Cw7dzpbiuq_oGQ',
               language: 'en',
-              types: '(airport)',
             }}
             styles={{
               textInputContainer: styles.autocompleteContainer,
@@ -147,7 +209,6 @@ const FlightSearch = () => {
             }}
           />
         </View>
-        {/* Arrival */}
         <View style={styles.locationContainer}>
           <GooglePlacesAutocomplete
             placeholder="Arrival Airport"
@@ -155,7 +216,6 @@ const FlightSearch = () => {
             query={{
               key: 'AIzaSyD_04TRnFkDE5khuHI75Cw7dzpbiuq_oGQ',
               language: 'en',
-              types: '(airport)',
             }}
             styles={{
               textInputContainer: styles.autocompleteContainer,
