@@ -27,6 +27,7 @@ const SavedEntriesScreen = () => {
   const [savedEntries, setSavedEntries] = useState([]);
   const [markers, setMarkers] = useState([]);
   const [flights, setFlights] = useState([]);
+  const [hotels, setHotels] = useState([]);
   const [error, setError] = useState(null);
   const [fadeAnim] = useState(new Animated.Value(0));
 
@@ -37,11 +38,13 @@ const SavedEntriesScreen = () => {
         await fetchSavedEntries(user.uid);
         await fetchFlights(user.uid);
         await fetchMarkers(user.uid);
+        await fetchHotels(user.uid);
       } else {
         setUser(null);
         setSavedEntries([]);
         setFlights([]);
         setMarkers([]);
+        setHotels([]);
         setLoading(false);
       }
     });
@@ -60,6 +63,9 @@ const SavedEntriesScreen = () => {
       } else if (user && selectedTab === 'Markers') {
         setLoading(true);
         fetchMarkers(user.uid);
+      } else if (user && selectedTab === 'Hotels') {
+        setLoading(true);
+        fetchHotels(user.uid);
       }
     }, [user, selectedTab])
   );
@@ -106,6 +112,21 @@ const SavedEntriesScreen = () => {
     } catch (error) {
       console.error('Error fetching markers: ', error);
       setError('Error fetching markers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchHotels = async (userId) => {
+    try {
+      const hotelsRef = collection(firestore, 'hotels');
+      const snapshot = await getDocs(hotelsRef);
+      const hotelsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setHotels(hotelsData);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching hotels: ', error);
+      setError('Error fetching hotels');
     } finally {
       setLoading(false);
     }
@@ -170,6 +191,15 @@ const SavedEntriesScreen = () => {
       setMarkers(prevMarkers => prevMarkers.filter(marker => marker.id !== markerId));
     } catch (error) {
       console.error('Error deleting marker: ', error);
+    }
+  };
+
+  const deleteHotel = async (hotelId) => {
+    try {
+      await deleteDoc(doc(firestore, 'hotels', hotelId));
+      setHotels(prevHotels => prevHotels.filter(hotel => hotel.id !== hotelId));
+    } catch (error) {
+      console.error('Error deleting hotel: ', error);
     }
   };
   
@@ -269,6 +299,35 @@ const SavedEntriesScreen = () => {
     </Swipeable>
   );
 
+  const renderSwipeableHotelItem = ({ item, index }) => (
+    <Swipeable
+      overshootRight={false}
+      renderRightActions={(progress, dragX) => {
+        const scale = dragX.interpolate({
+          inputRange: [-100, 0],
+          outputRange: [1, 0.5],
+          extrapolate: 'clamp',
+        });
+        return (
+          <Animated.View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', transform: [{ scale }] }}>
+            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteHotel(item.id)}>
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        );
+      }}
+    >
+      <TouchableOpacity onPress={() => handleHotelPress(item)} style={styles.entry}>
+        {/* Render hotel details here */}
+        <View>
+          {/* Render hotel details */}
+          <Text>Hotel Name: {item.hotel_name}</Text>
+          {/* Add more hotel details here */}
+        </View>
+      </TouchableOpacity>
+    </Swipeable>
+  );
+
   return (
     <View style={styles.container}>
       {/* Tab header */}
@@ -279,13 +338,16 @@ const SavedEntriesScreen = () => {
           onPress={() => handleTabChange('Chatbot')}>
           <Text style={styles.tabText}>Chatbot</Text>
         </TouchableOpacity>
-        {/* Flights tab */}
         <TouchableOpacity
           style={[styles.tab, selectedTab === 'Flights' && styles.selectedTab]}
           onPress={() => handleTabChange('Flights')}>
           <Text style={styles.tabText}>Flights</Text>
         </TouchableOpacity>
-        {/* Markers tab */}
+        <TouchableOpacity
+          style={[styles.tab, selectedTab === 'Hotels' && styles.selectedTab]}
+          onPress={() => handleTabChange('Hotels')}>
+          <Text style={styles.tabText}>Hotels</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, selectedTab === 'Markers' && styles.selectedTab]}
           onPress={() => handleTabChange('Markers')}>
@@ -297,8 +359,8 @@ const SavedEntriesScreen = () => {
         // Display loading indicator if data is being fetched
         <ActivityIndicator style={styles.loadingIndicator} size="large" color="#0000ff" />
       ) : (
+        // Render content based on selected tab
         <>
-          {/* Conditional rendering based on selected tab */}
           {selectedTab === 'Chatbot' ? (
             // Render chatlogs if 'Chatbot' tab is selected
             savedEntries.length > 0 ? (
@@ -325,7 +387,7 @@ const SavedEntriesScreen = () => {
               // Display message if no flights are found
               <Text style={styles.noEntriesText}>No flights found</Text>
             )
-          ) : (
+          ) : selectedTab === 'Markers' ? (
             // Render markers if 'Markers' tab is selected
             markers.length > 0 ? (
               // Render markers if there are markers
@@ -337,6 +399,19 @@ const SavedEntriesScreen = () => {
             ) : (
               // Display message if no markers are found
               <Text style={styles.noEntriesText}>No markers found</Text>
+            )
+          ) : (
+            // Render hotels if 'Hotels' tab is selected
+            hotels.length > 0 ? (
+              // Render hotels if there are hotels
+              <FlatList
+                data={hotels.sort((a, b) => a.timestamp.toDate() - b.timestamp.toDate())}
+                renderItem={renderSwipeableHotelItem}
+                keyExtractor={item => item.id}
+              />
+            ) : (
+              // Display message if no hotels are found
+              <Text style={styles.noEntriesText}>No hotels found</Text>
             )
           )}
         </>
