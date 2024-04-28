@@ -120,9 +120,10 @@ const SavedEntriesScreen = () => {
   const fetchHotels = async (userId) => {
     try {
       const hotelsRef = collection(firestore, 'hotels');
-      const snapshot = await getDocs(hotelsRef);
-      const hotelsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setHotels(hotelsData);
+      const querySnapshot = await getDocs(hotelsRef);
+      const hotelsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const userHotels = hotelsData.filter(hotel => hotel.user_uid === userId);
+      setHotels(userHotels);
       setError(null);
     } catch (error) {
       console.error('Error fetching hotels: ', error);
@@ -165,6 +166,10 @@ const SavedEntriesScreen = () => {
         isMarkerNavigation: true,
       },
     });
+  };
+
+  const handleHotelPress = () => {
+    
   };
 
   const deleteEntry = async (entryId) => {
@@ -318,11 +323,11 @@ const SavedEntriesScreen = () => {
       }}
     >
       <TouchableOpacity onPress={() => handleHotelPress(item)} style={styles.entry}>
-        {/* Render hotel details here */}
         <View>
-          {/* Render hotel details */}
-          <Text>Hotel Name: {item.hotel_name}</Text>
-          {/* Add more hotel details here */}
+          <Text>Hotel Name: {item.name}</Text>
+          <Text>Check In Time: {item.check_in_time.toDate().toLocaleString()}</Text>
+          <Text>Check Out Time: {item.check_out_time.toDate().toLocaleString()}</Text>
+          <Text>Price: ~{item.price}</Text>
         </View>
       </TouchableOpacity>
     </Swipeable>
@@ -405,7 +410,7 @@ const SavedEntriesScreen = () => {
             hotels.length > 0 ? (
               // Render hotels if there are hotels
               <FlatList
-                data={hotels.sort((a, b) => a.timestamp.toDate() - b.timestamp.toDate())}
+                data={hotels}
                 renderItem={renderSwipeableHotelItem}
                 keyExtractor={item => item.id}
               />
