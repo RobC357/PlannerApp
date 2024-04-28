@@ -14,6 +14,9 @@ import MapScreen from './screens/MapScreen';
 import FlightScreen from './screens/FlightScreen';
 import FlightDetails from './screens/FlightDetails';
 
+import HotelScreen from './screens/HotelScreen';
+import HotelDetails from './screens/HotelDetails';
+
 // Import screens for search stack
 import SearchScreen from './search/SearchScreen';
 
@@ -73,6 +76,15 @@ const FlightScreenStack = () => {
     </Stack.Navigator>
   );
 };
+// Screeen for hotels
+const HotelScreenStack = () => {
+  return (
+    <Stack.Navigator screenOptions={{ animationEnabled: true, gestureEnabled: true, gestureDirection: 'horizontal' }}>
+      <Stack.Screen name="Hotels" component={HotelScreen} options={{ headerLeft: () => null, title: '', }} />
+      <Stack.Screen name="HotelDetails" component={HotelDetails} options={{ title: '', }} />
+    </Stack.Navigator>
+  );
+};
 export default function UserStack() {
   return (
     <React.Fragment>
@@ -115,6 +127,15 @@ export default function UserStack() {
               tabBarShowLabel: false,
               tabBarIcon: ({ color, size }) => (
                 <FontAwesome5 name="plane" size={size} color={color} solid={false} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="HotelScreenStack"
+            component={HotelScreenStack}
+            options={{
+              tabBarShowLabel: false, tabBarIcon: ({ color, size }) => (
+                <AntDesign name="home" size={size} color={color} />
               ),
             }}
           />
