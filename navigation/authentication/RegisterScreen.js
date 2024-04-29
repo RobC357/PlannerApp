@@ -18,34 +18,36 @@ const RegisterScreen = ({ navigation }) => {
       resetErrorMessage();
       return;
     }
-
+  
     // Check for a valid email format
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError('Please enter a valid email address.');
       resetErrorMessage();
       return;
     }
-
+  
     if (!/(?=.*[A-Z])(?=.*[0-9])/.test(password)) {
       setError('Password must contain at least one uppercase letter and one number.');
       resetErrorMessage();
       return;
     }
-
+  
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
+  
       // Set the display name for the user
       await updateProfile(userCredential.user, { displayName: displayName });
-
+  
       // Navigate to the profile screen
       navigation.navigate('Profile');
     } catch (error) {
       // Handle registration errors
-      console.error('Registration error:', error.message);
+      if (error.code === 'auth/email-already-in-use') {
+        setError('This email is already registered. Please login instead.');
+      } else {
+        console.error('Registration error:', error.message);
+      }
     }
-
-    handleClose();
   };
 
   const resetErrorMessage = () => {
@@ -144,10 +146,11 @@ const styles = StyleSheet.create({
     width: '80%',
     alignItems: 'center',
     marginTop: 10,
+    paddingHorizontal: 20,
   },
   errorText: {
-    height: 20,
     color: 'red',
+    textAlign: 'center',
   },
 });
 
