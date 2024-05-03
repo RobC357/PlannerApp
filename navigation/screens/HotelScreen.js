@@ -17,6 +17,9 @@ const HotelSearch = () => {
   const [checkOutCalendarVisible, setCheckOutCalendarVisible] = useState(false);
   const [cardWidth, setCardWidth] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortKey, setSortKey] = useState('');
+  const [isAscending, setIsAscending] = useState(true);
+  const [numAdults, setNumAdults] = useState(1);
 
   useEffect(() => {
     const screenWidth = Dimensions.get('window').width;
@@ -38,11 +41,12 @@ const HotelSearch = () => {
     try {
       const response = await axios.get('https://serpapi.com/search', {
         params: {
-          api_key: '32a22720e066e5d948a13183ce32715e8008f02c3cb67ced3b623ef2e02e9175',
+          api_key: '9978848158bdda2246a6190f20c0ec8611ba53cec5e0c364ea877d68aba3d976',
           engine: 'google_hotels',
           q: searchQuery, // Use the search query entered by the user
           check_in_date: checkInDate,
-          check_out_date: checkOutDate
+          check_out_date: checkOutDate,
+          adults: numAdults
         }
       });
       // Extract and set hotel data
@@ -52,7 +56,7 @@ const HotelSearch = () => {
       // Check if error is due to network issue
       if (error.response) {
         // The request was made and the server responded with a status code that falls out of the range of 2xx
-        alert('Network error. Please try again later.');
+        alert('Network error. Please retry or try another request.');
       } else if (error.request) {
         // The request was made but no response was received
         alert('No response from server. Please check your internet connection.');
@@ -80,6 +84,15 @@ const HotelSearch = () => {
     return stars;
   };
 
+  const handleAdultsChange = (text) => {
+    let num = parseInt(text);
+    // Prevent number of adults from going below 1 and above 99
+    if (!isNaN(num)) {
+      num = Math.min(Math.max(num, 1), 99);
+      setNumAdults(num);
+    }
+  };
+
   const renderHotelCard = ({ item }) => {
     return (
       <TouchableOpacity onPress={() => goToHotelDetails(item)}>
@@ -105,6 +118,27 @@ const HotelSearch = () => {
     );
   };
 
+  const sortHotels = (key) => {
+    const sortedHotels = hotels.sort((a, b) => {
+      if (isAscending) {
+        if (key === 'rate_per_night.extracted_lowest') {
+          return a.rate_per_night.extracted_lowest - b.rate_per_night.extracted_lowest;
+        } else {
+          return a[key] > b[key] ? 1 : -1;
+        }
+      } else {
+        if (key === 'rate_per_night.extracted_lowest') {
+          return b.rate_per_night.extracted_lowest - a.rate_per_night.extracted_lowest;
+        } else {
+          return a[key] < b[key] ? 1 : -1;
+        }
+      }
+    });
+    setHotels(sortedHotels);
+    setSortKey(key);
+    setIsAscending(!isAscending);
+  };
+
   return (
     <View style={styles.container}>
       {/* Search Input */}
@@ -114,6 +148,17 @@ const HotelSearch = () => {
         onChangeText={setSearchQuery}
         value={searchQuery}
       />
+
+      {/* People Input */}
+      <View style={styles.selectorContainer}>
+          <Text>Adults:</Text>
+          <TextInput
+            style={styles.selectorInput}
+            keyboardType="numeric"
+            onChangeText={handleAdultsChange}
+            value={numAdults.toString()}
+          />
+        </View>
 
       {/* Display selected Check In and Check out dates */}
       <View style={styles.dateContainer}>
@@ -138,13 +183,32 @@ const HotelSearch = () => {
       {/* Search Button */}
       <Button title="Search Hotels" onPress={searchHotels} />
 
-      {/* Hotel results section */}
-      <View style={styles.flatListContainer}>
+       {/* Hotel results section */}
+       <View style={styles.flatListContainer}>
         <FlatList
           data={hotels}
           renderItem={renderHotelCard}
           keyExtractor={(item, index) => index.toString()}
           horizontal={false} // Restrict scrolling to vertical movement
+          ListHeaderComponent={
+            <View style={styles.sortContainer}>
+            <Text style={styles.sortText}>Sort by:</Text>
+            <TouchableOpacity onPress={() => sortHotels('name')}>
+              <Text style={styles.sortOption}>Name</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => sortHotels('overall_rating')}>
+              <Text style={styles.sortOption}>Rating</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => sortHotels('rate_per_night.extracted_lowest')}>
+              <Text style={styles.sortOption}>Price</Text>
+              {isAscending ? (
+                <FontAwesome name="arrow-up" size={12} color="gray" />
+              ) : (
+                <FontAwesome name="arrow-down" size={12} color="gray" />
+              )}
+            </TouchableOpacity>
+          </View>
+          }
         />
       </View>
 
@@ -299,6 +363,37 @@ const styles = StyleSheet.create({
   },
   starIcon: {
     color: 'gold',
+  },
+  sortText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  sortOption: {
+    fontSize: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+  },
+  sortContainer: {
+    flexDirection: 'row',
+    padding: 5,
+
+  },
+  selectorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  selectorInput: {
+    width: 50,
+    height: 30,
+    borderWidth: 1,
+    borderColor: 'gray',
+    marginHorizontal: 5,
+    paddingHorizontal: 5,
   },
 });
 

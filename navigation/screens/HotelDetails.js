@@ -33,6 +33,13 @@ const HotelDetails = ({ route }) => {
     }
   };
 
+  let images = hotelDetails.images.map(image => ({
+    original: image.original_image,
+    thumbnail: image.thumbnail
+  }));
+
+
+
   const saveHotel = async () => {
     try {
       const user = auth.currentUser;
@@ -91,17 +98,19 @@ const HotelDetails = ({ route }) => {
   return (
     <ScrollView contentContainerStyle={styles.scrollViewContent}>
       <View style={styles.container}>
-        <Swiper style={styles.swiper} showsButtons={true} autoplay={true} autoplayTimeout={5000}>
-          {hotelDetails.images.map((image, index) => (
-            <View key={index}>
-              <Image
-                source={{ uri: image.original_image }}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            </View>
-          ))}
-        </Swiper>
+        <View style={styles.swiperContainer}>
+          <Swiper autoplay={true} showsButtons={true} autoplayTimeout={5.0}>
+            {images.map((image, index) => (
+              <View key={index} style={styles.swiperItem}>
+                <Image
+                  style={styles.image}
+                  source={{ uri: image.original }}
+                  resizeMode="cover"
+                />
+              </View>
+            ))}
+          </Swiper>
+        </View>
         <Text style={styles.title}>Hotel Details</Text>
         <View style={styles.detailsContainer}>
           <HotelInfo label="Hotel Name" value={hotelDetails.name} />
@@ -178,6 +187,10 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     width: '100%',
+  },
+  swiperContainer: {
+    height: 200,
+    marginBottom: 20,
   },
   detailItem: {
     flexDirection: 'row',

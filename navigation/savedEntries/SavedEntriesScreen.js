@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Animated, FlatList, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Animated, FlatList, Image, Linking, } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
@@ -168,8 +168,8 @@ const SavedEntriesScreen = () => {
     });
   };
 
-  const handleHotelPress = () => {
-    
+  const handleHotelPress = (hotel) => {
+    Linking.openURL(hotel.link);
   };
 
   const deleteEntry = async (entryId) => {
