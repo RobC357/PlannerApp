@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -26,17 +27,13 @@ const FlightSearch = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const [flights, setFlights] = useState([]);
-  const [departureDate, setDepartureDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
-  const [arrivalDate, setArrivalDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [departureDate, setDepartureDate] = useState(new Date().toISOString().split("T")[0]);
+  const [arrivalDate, setArrivalDate] = useState(new Date().toISOString().split("T")[0]);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [departureCalendarVisible, setDepartureCalendarVisible] =
-    useState(false);
+  const [departureCalendarVisible, setDepartureCalendarVisible] = useState(false);
   const [arrivalCalendarVisible, setArrivalCalendarVisible] = useState(false);
   const [cardWidth, setCardWidth] = useState(null);
+  const [dropdownWidth, setdropdownWidth] = useState(null);
   const [departurePlaceId, setDeparturePlaceId] = useState("");
   const [arrivalPlaceId, setArrivalPlaceId] = useState("");
   const [departureAirportOptions, setDepartureAirportOptions] = useState([]);
@@ -92,6 +89,7 @@ const FlightSearch = () => {
   useEffect(() => {
     const screenWidth = Dimensions.get("window").width;
     const calculatedCardWidth = screenWidth * 0.8;
+    const dropdownWidth = screenWidth / 3;
     setCardWidth(calculatedCardWidth);
   }, []);
 
@@ -123,6 +121,33 @@ const FlightSearch = () => {
     const infantInSeatCount = peopleCounts["Infant (in seat)"] || 0; // Access Infant in seat count using square bracket notation
     const infantInLapCount = peopleCounts["Infant (in lap)"] || 0; // Access Infant in lap count using square bracket notation
 
+    if (childCount !== infantInSeatCount + infantInLapCount) {
+      alert("Please designate infants correctly.");
+      setLoading(false);
+      return;
+    }
+
+    if (!departurePlaceId || !arrivalPlaceId) {
+      alert("Please select departure and/or arrival airports.");
+      setLoading(false);
+      return;
+    }
+
+    if (adultCount === 0) {
+      alert("Please select at least one adult.");
+      setLoading(false);
+      return;
+    }
+
+    const flightTypeInt = flightType.value === "Round trip" ? 1 : flightType.value === "One-way" ? 2 : 1;
+    const travelClassInt = travelClass.value === "Economy" ? 1 : travelClass.value === "Premium Economy" ? 2 : travelClass.value === "Business" ? 3 : 4;
+
+    let returnDateToSend = arrivalDate; // Default return date is arrival date (for one way detection)
+
+    if (flightType.value === "One-way" || flightTypeInt === 2) {
+      returnDateToSend = null;
+  }
+
     try {
       // Use departure and arrival IATA codes in the API request
       const response = await axios.get("https://serpapi.com/search", {
@@ -133,9 +158,10 @@ const FlightSearch = () => {
           departure_id: departurePlaceId,
           arrival_id: arrivalPlaceId,
           currency: "USD",
-          travel_class: 1,
+          travel_class: travelClassInt,
+          type: flightTypeInt,
           outbound_date: departureDate,
-          return_date: arrivalDate,
+          return_date: returnDateToSend,
           adults: adultCount,
           children: childCount,
           infants_in_seat: infantInSeatCount,
@@ -149,7 +175,7 @@ const FlightSearch = () => {
       const allFlights = [...bestFlights, ...otherFlights];
 
       // Include only  the flights that match what the user chose
-      var filteredFlights = allFlights.filter(function (flight) {
+      allFlights.filter(function (flight) {
         // Check if the flight type matches flightType
         var isCorrectType = flight.type === flightType.value;
 
@@ -164,7 +190,7 @@ const FlightSearch = () => {
         return isCorrectType && hasCorrectTravelClass;
       });
 
-      setFlights(filteredFlights);
+      setFlights(allFlights);
     } catch (error) {
       console.error("Error fetching flights:", error);
     }
@@ -301,6 +327,9 @@ const FlightSearch = () => {
               <Text style={styles.bottomRow}>
                 Travel Class: {item.flights[0].travel_class}
               </Text>
+              <Text style={styles.bottomRow}>
+                Type: {item.type}
+              </Text>
             </View>
             <View style={styles.bottomRow}>
               <Text style={styles.bottomRowText}>
@@ -349,9 +378,9 @@ const FlightSearch = () => {
         </View>
       </View>
 
-      {/* START OF DROPDOWN SECTION */}
+       {/* START OF DROPDOWN SECTION */}
       {/* Container for Flight Type dropdown */}
-      <View style={[styles.dropdownContainer, { top: 1, left: 30 }]}>
+      <View style={[styles.dropdownContainer, { top: 1, left: 25, width: dropdownWidth }]}>
         <CustomDropdown
           options={flightTypeOptions}
           onSelect={handleFlightSelect}
@@ -360,17 +389,16 @@ const FlightSearch = () => {
       </View>
 
       {/* Container for Travel Class dropdown */}
-
-      <View style={[styles.dropdownContainer, { top: 1, left: 120 }]}>
+      <View style={[styles.dropdownContainer, { top: 1, left: 125, width: dropdownWidth }]}>
         <CustomDropdown
           options={travelClassOptions}
           onSelect={handleTravelClassSelect}
           selectedOption={travelClass}
         />
       </View>
-      {/* Container for People dropdown */}
 
-      <View style={[styles.dropdownContainer, { top: 1, left: 260 }]}>
+      {/* Container for People dropdown */}
+      <View style={[styles.dropdownContainer, { top: 1, left: 265, width: dropdownWidth }]}>
         <PeopleDropdown
           options={[
             "Adult",
@@ -649,3 +677,22 @@ const styles = StyleSheet.create({
 });
 
 export default FlightSearch;
+
+  
+  
+  // const sortFlights = (String key) => {
+  //   const sortedFlights = flights.sort((a, b) => {
+  //     if (isAscending) {
+  //       if (key === 'rate_per_night.extracted_lowest') {
+  //         return a.rate_per_night.extracted_lowest - b.rate_per_night.extracted_lowest;
+  //       } else {
+  //         return a[key] > b[key] ? 1 : -1;
+  //       }
+  //     } else {
+  //       if (key === 'rate_per_night.extracted_lowest') {
+  //         return b.rate_per_night.extracted_lowest - a.rate_per_night.extracted_lowest;
+  //       } else {
+  //         return a[key] < b[key] ? 1 : -1;
+  //       }
+  //     }
+  //   });
