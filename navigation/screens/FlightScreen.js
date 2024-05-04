@@ -16,12 +16,11 @@ import {
 import CalendarPicker from "react-native-calendar-picker";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import moment from "moment";
 import axios from "axios";
 import CustomDropdown from "../../utils/CustomDropdown";
 import PeopleDropdown from "../../utils/PeopleDropdown";
-import { ScrollView } from "react-native-gesture-handler";
 
 const FlightSearch = () => {
   const navigation = useNavigation();
@@ -42,6 +41,31 @@ const FlightSearch = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   // peopleCounts = {Adult: #, Child: # Infant: #}
   const [peopleCounts, setPeopleCounts] = useState({});
+  const [sortKey, setSortKey] = useState('');
+  const [isAscending, setIsAscending] = useState(true);
+  // used in filters
+  const [flightType, setFlightType] = useState({ value: "Round trip" });
+  const [travelClass, setTravelClass] = useState({ value: "Economy" });
+  const [sortType, setSortType] = useState({ value: "Price" });
+
+  const flightTypeOptions = [
+    { value: "Round trip" },
+    { value: "One-way" },
+    { value: "Multi-city" },
+  ];
+
+  const travelClassOptions = [
+    { value: "Economy" },
+    { value: "Premium Economy" },
+    { value: "Business" },
+    { value: "First" },
+  ];
+
+  const sortingOptions = [
+    { value: "Price" },
+    { value: "Duration" },
+  ];
+
 
   const handleFlightSelect = (option) => {
     setFlightType(option);
@@ -54,25 +78,60 @@ const FlightSearch = () => {
   const handlePeopleCountsUpdate = (newPeopleCounts) => {
     setPeopleCounts(newPeopleCounts);
   };
-  // used in filters
 
-  const flightTypeOptions = [
-    { value: "Round trip" },
-    { value: "One-way" },
-    { value: "Multi-city" },
-    // Add more options as needed
-  ];
+  const handleSortTypeSelect = (option)=>{
+    setSortType(option);
+    sortFlights(option);
+  }
 
-  const travelClassOptions = [
-    { value: "Economy" },
-    { value: "Premium Economy" },
-    { value: "Business" },
-    { value: "First" },
-    // Add more options as needed
-  ];
 
-  const [flightType, setFlightType] = useState({ value: "Round trip" });
-  const [travelClass, setTravelClass] = useState({ value: "Economy" });
+  const sortFlights = (key) => {
+    const sortedFlights = [...flights].sort((a, b) => {
+      let aValue, bValue;
+
+      if(isAscending){
+        if (key.value === "Price") {
+            console.log("LOW TO HIGH")
+          return a.price - b.price;
+
+        } else if (key.value === "Duration") {
+          sortFlightsByDuration(flights);    
+        }
+      }
+      else {
+        if (key.value === "Price") {
+
+          console.log("HIGH TO LOW")     
+          return b.price - a.price;
+
+        } else if (key.value === "Duration") {
+          sortFlightsByDuration(flights);    
+        }
+      }
+  
+      const multiplier = isAscending ? 1 : -1;
+      return (aValue - bValue) * multiplier;
+    });
+  
+  
+    setFlights(sortedFlights);
+    setSortKey(key);
+    setIsAscending(!isAscending);  // Toggles for next sort operation
+  };
+  
+
+  function sortFlightsByDuration(flights) {
+    flights.forEach(flight => {
+      flight.flights.sort((a, b) => {
+        if (isAscending) {
+          return b.duration - a.duration; // Sorting in descending order
+        } else {
+          return a.duration - b.duration; // Sorting in ascending order
+        }
+      });
+    });
+  }
+
 
   // Callback function for selecting flight type
   const handleFlightTypeSelect = (filterType, option) => {
@@ -285,6 +344,8 @@ const FlightSearch = () => {
       "h:mm A"
     );
 
+
+    // tq
     return (
       <TouchableOpacity onPress={() => goToFlightDetails(item)}>
         <View style={[styles.cardContainer, { width: cardWidth }]}>
@@ -377,6 +438,30 @@ const FlightSearch = () => {
           />
         </View>
       </View>
+
+
+        {/* Sorting options */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 20}}>
+
+        <View style={[styles.dropdownContainer, { top: 5, left: -55, width: dropdownWidth }]}>
+          <Text>Sort By:</Text>
+        </View>
+        
+        <CustomDropdown
+          options={sortingOptions}
+          onSelect={handleSortTypeSelect}
+          selectedOption={sortType}
+        />
+
+        <View style={{ justifyContent: 'center' }}>
+          {isAscending ? (
+            <FontAwesome name="arrow-up" size={12} color="gray" />
+          ) : (
+            <FontAwesome name="arrow-down" size={12} color="gray" />
+          )}
+        </View>
+      </View>
+
 
        {/* START OF DROPDOWN SECTION */}
       {/* Container for Flight Type dropdown */}
@@ -674,25 +759,28 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginRight: 10, // Add right margin to create space between dropdowns
   },
+  sortButton: {
+    backgroundColor: 'transparent',
+    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    marginVertical: 10, 
+    marginHorizontal: 10, 
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sortButtonBorder: {
+    borderWidth: 1,
+    borderColor: 'lightgray',
+  },
+  sortButtonText: {
+    color: 'black',
+    marginRight: 5,
+  },
 });
 
 export default FlightSearch;
 
   
   
-  // const sortFlights = (String key) => {
-  //   const sortedFlights = flights.sort((a, b) => {
-  //     if (isAscending) {
-  //       if (key === 'rate_per_night.extracted_lowest') {
-  //         return a.rate_per_night.extracted_lowest - b.rate_per_night.extracted_lowest;
-  //       } else {
-  //         return a[key] > b[key] ? 1 : -1;
-  //       }
-  //     } else {
-  //       if (key === 'rate_per_night.extracted_lowest') {
-  //         return b.rate_per_night.extracted_lowest - a.rate_per_night.extracted_lowest;
-  //       } else {
-  //         return a[key] < b[key] ? 1 : -1;
-  //       }
-  //     }
-  //   });
+
