@@ -51,7 +51,7 @@ const FlightSearch = () => {
   const flightTypeOptions = [
     { value: "Round trip" },
     { value: "One-way" },
-    { value: "Multi-city" },
+    //{ value: "Multi-city" },
   ];
 
   const travelClassOptions = [
@@ -81,56 +81,31 @@ const FlightSearch = () => {
 
   const handleSortTypeSelect = (option)=>{
     setSortType(option);
-    sortFlights(option);
+    sortFlights(option.value);
+    
   }
 
 
   const sortFlights = (key) => {
-    const sortedFlights = [...flights].sort((a, b) => {
-      let aValue, bValue;
-
-      if(isAscending){
-        if (key.value === "Price") {
-            console.log("LOW TO HIGH")
+    const sortedFlights = flights.sort((a, b) => {
+      if (isAscending) {
+        if (key === 'price') {
           return a.price - b.price;
-
-        } else if (key.value === "Duration") {
-          sortFlightsByDuration(flights);    
+        } else if (key === 'total_duration') {
+          return a.total_duration - b.total_duration;
         }
-      }
-      else {
-        if (key.value === "Price") {
-
-          console.log("HIGH TO LOW")     
+      } else {
+        if (key === 'price') {
           return b.price - a.price;
-
-        } else if (key.value === "Duration") {
-          sortFlightsByDuration(flights);    
+        } else if (key === 'total_duration') {
+          return b.total_duration - a.total_duration;
         }
       }
-  
-      const multiplier = isAscending ? 1 : -1;
-      return (aValue - bValue) * multiplier;
     });
-  
-  
     setFlights(sortedFlights);
     setSortKey(key);
-    setIsAscending(!isAscending);  // Toggles for next sort operation
+    setIsAscending(!isAscending);
   };
-  
-
-  function sortFlightsByDuration(flights) {
-    flights.forEach(flight => {
-      flight.flights.sort((a, b) => {
-        if (isAscending) {
-          return b.duration - a.duration; // Sorting in descending order
-        } else {
-          return a.duration - b.duration; // Sorting in ascending order
-        }
-      });
-    });
-  }
 
 
   // Callback function for selecting flight type
@@ -441,26 +416,25 @@ const FlightSearch = () => {
 
 
         {/* Sorting options */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 20}}>
-
-        <View style={[styles.dropdownContainer, { top: 5, left: -55, width: dropdownWidth }]}>
-          <Text>Sort By:</Text>
-        </View>
-        
-        <CustomDropdown
-          options={sortingOptions}
-          onSelect={handleSortTypeSelect}
-          selectedOption={sortType}
-        />
-
-        <View style={{ justifyContent: 'center' }}>
-          {isAscending ? (
-            <FontAwesome name="arrow-up" size={12} color="gray" />
-          ) : (
-            <FontAwesome name="arrow-down" size={12} color="gray" />
-          )}
-        </View>
-      </View>
+        <View style={styles.sortContainer}>
+              <Text style={styles.sortText}>Sort by:</Text>
+              <TouchableOpacity onPress={() => sortFlights('price')}>
+                <Text style={styles.sortOption}>Price</Text>
+                {isAscending && sortKey === 'price' ? (
+                  <FontAwesome name="arrow-up" size={12} color="gray" />
+                ) : (
+                  <FontAwesome name="arrow-down" size={12} color="gray" />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => sortFlights('total_duration')}>
+                <Text style={styles.sortOption}>Duration</Text>
+                {isAscending && sortKey === 'total_duration' ? (
+                  <FontAwesome name="arrow-up" size={12} color="gray" />
+                ) : (
+                  <FontAwesome name="arrow-down" size={12} color="gray" />
+                )}
+              </TouchableOpacity>
+          </View>
 
 
        {/* START OF DROPDOWN SECTION */}
@@ -483,7 +457,7 @@ const FlightSearch = () => {
       </View>
 
       {/* Container for People dropdown */}
-      <View style={[styles.dropdownContainer, { top: 1, left: 265, width: dropdownWidth }]}>
+      <View style={[styles.dropdownContainer, { top: 1, left: 225, width: dropdownWidth }]}>
         <PeopleDropdown
           options={[
             "Adult",
@@ -777,10 +751,18 @@ const styles = StyleSheet.create({
     color: 'black',
     marginRight: 5,
   },
+  sortOption: {
+    fontSize: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+  },
+  sortContainer: {
+    flexDirection: 'row',
+    padding: 5,
+
+  },
 });
 
 export default FlightSearch;
-
-  
-  
-
