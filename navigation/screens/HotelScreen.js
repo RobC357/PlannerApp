@@ -192,22 +192,24 @@ const HotelSearch = () => {
           horizontal={false} // Restrict scrolling to vertical movement
           ListHeaderComponent={
             <View style={styles.sortContainer}>
-            <Text style={styles.sortText}>Sort by:</Text>
-            <TouchableOpacity onPress={() => sortHotels('name')}>
-              <Text style={styles.sortOption}>Name</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => sortHotels('overall_rating')}>
-              <Text style={styles.sortOption}>Rating</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => sortHotels('rate_per_night.extracted_lowest')}>
-              <Text style={styles.sortOption}>Price</Text>
-              {isAscending ? (
-                <FontAwesome name="arrow-up" size={12} color="gray" />
-              ) : (
-                <FontAwesome name="arrow-down" size={12} color="gray" />
-              )}
-            </TouchableOpacity>
-          </View>
+              <Text style={styles.sortText}>Sort by:</Text>
+              <TouchableOpacity onPress={() => sortHotels('name')}>
+                <Text style={styles.sortOption}>Name</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => sortHotels('overall_rating')}>
+                <Text style={styles.sortOption}>Rating</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => sortHotels('rate_per_night.extracted_lowest')}>
+                <View style={styles.priceContainer}>
+                  <Text style={styles.sortOption}>Price</Text>
+                  {isAscending ? (
+                    <FontAwesome name="arrow-up" size={12} color="gray" />
+                  ) : (
+                    <FontAwesome name="arrow-down" size={12} color="gray" />
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
           }
         />
       </View>
@@ -394,6 +396,10 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     marginHorizontal: 5,
     paddingHorizontal: 5,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 
