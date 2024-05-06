@@ -1,0 +1,30 @@
+body {
+    background-color: #f8f9fa;
+    padding-top: 20px;
+  }
+  
+  .container {
+    margin-top: 50px;
+  }
+  
+  .navbar-brand {
+    font-weight: bold;
+  }
+  
+  .nav-tabs .nav-item .nav-link {
+    color: #007bff;
+  }
+  
+  .nav-tabs .nav-item .nav-link.active {
+    color: #495057;
+    font-weight: bold;
+  }
+  
+  .tab-pane {
+    animation: fadeIn 1s;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }

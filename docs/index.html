@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trip Easy</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    ul {
+      padding-left: 20px;
+    }
+    body {
+      font-family: 'Arial', sans-serif;
+    }
+    body.dark-mode {
+      background-color: #222;
+      color: #fff;
+    }
+    .dark-mode-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">Trip Easy</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+</nav>
+
+<div class="container mt-4">
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="features-tab" data-toggle="tab" href="#features" role="tab" aria-controls="features" aria-selected="false">Features</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="members-tab" data-toggle="tab" href="#members" role="tab" aria-controls="members" aria-selected="false">Team Members</a>
+      </li>
+    <li class="nav-item">
+      <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Contact</a>
+    </li>
+  </ul>
+
+  <div class="tab-content mt-4" id="myTabContent">
+    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+      <h1>Welcome to Trip Easy!</h1>
+      <p>Our app make traveling easy and convenient for you.</p>
+      <div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="assets/landingpage.JPG" class="d-block mx-auto" alt="Image 1" style="max-width: 500px">
+          </div>
+          <div class="carousel-item">
+            <img src="assets/chatbot.JPG" class="d-block mx-auto" alt="Image 2" style="max-width: 500px">
+          </div>
+          <div class="carousel-item">
+            <img src="assets/chatbotlog.JPG" class="d-block mx-auto" alt="Image 3" style="max-width: 500px">
+          </div>
+          <div class="carousel-item">
+            <img src="assets/mapscreen.JPG" class="d-block mx-auto" alt="Image 4" style="max-width: 500px">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-pane fade" id="features" role="tabpanel" aria-labelledby="features-tab">
+      <h2>Features</h2>
+      <ul>
+        <li>Advanced AI Chatbot for recommendations</li>
+        <li>Map Viewer with marker support</li>
+        <li>Flight and Hotel search</li>
+      </ul>
+    </div>
+    <div class="tab-pane fade" id="members" role="tabpanel" aria-labelledby="members-tab">
+        <h2>Team Members</h2>
+        <ul>
+          <li>Akib Kazi</li>
+          <li>Raj Gajera</li>
+          <li>Isaac Ortega</li>
+          <li>Robert Chu</li>
+          <li>Vishnu Dawah</li>
+          <li>Dhruvi Gajera</li>
+        </ul>
+      </div>
+    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+      <h2>More Information</h2>
+      <ul>
+        <li><a href="https://github.com/RobC357/PlannerApp" target="_blank">PlannerApp Repository</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    const darkModeToggle = document.querySelector('.dark-mode-toggle');
+    const body = document.body;
+  
+    darkModeToggle.addEventListener('click', () => {
+      if (body.classList.contains('dark-mode')) {
+        body.classList.remove('dark-mode');
+        localStorage.setItem('darkMode', 'disabled');
+      } else {
+        body.classList.add('dark-mode');
+        localStorage.setItem('darkMode', 'enabled');
+      }
+    });
+  
+    // Check if Dark Mode is enabled from local storage
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      body.classList.add('dark-mode');
+    }
+  </script>
+</body>
+</html>
