@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trip Easy</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" integrity="sha384-4LISF5TTJX/fLmGSxO53rV4miRxdg84mZsxmO8Rx5jGtp/LbrixFETvWa5a6sESd" crossorigin="anonymous">
   <link rel="stylesheet" href="style.css">
   <style>
     ul {
@@ -26,11 +27,12 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">Trip Easy</a>
+<nav class="navbar navbar-expand-lg navbar-light">
+    <a class="navbar-brand trip-easy-brand" href="#">Trip Easy</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+    <span class="navbar-toggler-icon "></span>
   </button>
+  <button class="dark-mode-toggle btn btn-primary"><i class="bi bi-sun"></i></button>
 </nav>
 
 <div class="container mt-4">
@@ -104,20 +106,25 @@
 <script>
     const darkModeToggle = document.querySelector('.dark-mode-toggle');
     const body = document.body;
-  
+
     darkModeToggle.addEventListener('click', () => {
-      if (body.classList.contains('dark-mode')) {
+    if (body.classList.contains('dark-mode')) {
         body.classList.remove('dark-mode');
         localStorage.setItem('darkMode', 'disabled');
-      } else {
+        darkModeToggle.innerHTML = '<i class="bi bi-sun"></i>';
+    } else {
         body.classList.add('dark-mode');
         localStorage.setItem('darkMode', 'enabled');
-      }
+        darkModeToggle.innerHTML = '<i class="bi bi-moon"></i>';
+    }
     });
-  
+
     // Check if Dark Mode is enabled from local storage
     if (localStorage.getItem('darkMode') === 'enabled') {
-      body.classList.add('dark-mode');
+    body.classList.add('dark-mode');
+    darkModeToggle.innerHTML = '<i class="bi bi-moon"></i>';
+    } else {
+    darkModeToggle.innerHTML = '<i class="bi bi-sun"></i>';
     }
   </script>
 </body>

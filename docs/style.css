@@ -12,7 +12,7 @@ body {
   }
   
   .nav-tabs .nav-item .nav-link {
-    color: #007bff;
+    color: #0099ff;
   }
   
   .nav-tabs .nav-item .nav-link.active {
@@ -22,6 +22,13 @@ body {
   
   .tab-pane {
     animation: fadeIn 1s;
+  }
+
+  .trip-easy-brand {
+    background-color: #0099ff;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 20px;
   }
   
   @keyframes fadeIn {
