@@ -1,22 +1,21 @@
 {
   "project_info": {
-    "project_number": "863549919004",
-    "firebase_url": "https://plannerapp-40d82-default-rtdb.firebaseio.com",
-    "project_id": "plannerapp-40d82",
-    "storage_bucket": "plannerapp-40d82.appspot.com"
+    "project_number": "99386510019",
+    "project_id": "plannerapp-new",
+    "storage_bucket": "plannerapp-new.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:863549919004:android:56a6b23963674d3ee234d9",
+        "mobilesdk_app_id": "1:99386510019:android:2a103ece98caccd6b8f076",
         "android_client_info": {
-          "package_name": "com.company.plannerapp"
+          "package_name": "plannerapp.new"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDWdsoMthYSsPYAVggzdU-8CtRYiT76Gd4"
+          "current_key": "AIzaSyDQ0pQMhHBzgkU6OeJz_ig732aX-YcmhAI"
         }
       ],
       "services": {

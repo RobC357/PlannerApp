@@ -39,7 +39,7 @@ const RegisterScreen = ({ navigation }) => {
       await updateProfile(userCredential.user, { displayName: displayName });
   
       // Navigate to the profile screen
-      navigation.navigate('Profile');
+      navigation.navigate('LandingPage');
     } catch (error) {
       // Handle registration errors
       if (error.code === 'auth/email-already-in-use') {

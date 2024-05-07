@@ -12,7 +12,7 @@ app.use(cors());
 ///////////////////////////////////////////////// GEMINI API CONFIG ///////////////////////////////////////////////
 
 const GEMINI_MODEL_NAME = "gemini-pro";
-const GEMINI_API_KEY = "AIzaSyCSBHH6v6EO08PvOMbJvn4K1os04SKwyUI";
+const GEMINI_API_KEY = "";
 
 async function runChat(userInput) {
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);

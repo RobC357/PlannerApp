@@ -17,7 +17,7 @@ const SearchScreen = () => {
   const auth = getAuth();
 
   const runChat = async (userInput) => {
-    const GEMINI_API_KEY = "AIzaSyCSBHH6v6EO08PvOMbJvn4K1os04SKwyUI";
+    const GEMINI_API_KEY = "AIzaSyACSmzLrB3lkkfwY2nRZgdN66i0x9o1gwQ";
     const GEMINI_MODEL_NAME = "gemini-pro";
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     

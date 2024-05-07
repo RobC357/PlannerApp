@@ -238,7 +238,7 @@ const FlightSearch = () => {
         {
           params: {
             address: address,
-            key: "AIzaSyD_04TRnFkDE5khuHI75Cw7dzpbiuq_oGQ", // Replace with your Google Geocoding API key
+            key: "AIzaSyBNAj7uomTA-m9Gja0gV8-wv2YQdIHGCo8", // Replace with your Google Geocoding API key
           },
         }
       );
@@ -389,7 +389,7 @@ const FlightSearch = () => {
             placeholder="Departure Airport"
             onPress={handleDepartureSelection}
             query={{
-              key: "AIzaSyD_04TRnFkDE5khuHI75Cw7dzpbiuq_oGQ",
+              key: "AIzaSyBNAj7uomTA-m9Gja0gV8-wv2YQdIHGCo8",
               language: "en",
             }}
             styles={{
@@ -403,7 +403,7 @@ const FlightSearch = () => {
             placeholder="Arrival Airport"
             onPress={handleArrivalSelection}
             query={{
-              key: "AIzaSyD_04TRnFkDE5khuHI75Cw7dzpbiuq_oGQ",
+              key: "AIzaSyBNAj7uomTA-m9Gja0gV8-wv2YQdIHGCo8",
               language: "en",
             }}
             styles={{
