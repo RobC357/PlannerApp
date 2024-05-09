@@ -439,7 +439,7 @@ const FlightSearch = () => {
 
        {/* START OF DROPDOWN SECTION */}
       {/* Container for Flight Type dropdown */}
-      <View style={[styles.dropdownContainer, { top: 1, left: 25, width: dropdownWidth }]}>
+      <View style={[styles.dropdownContainer, { top: 1, left: 30, width: dropdownWidth }]}>
         <CustomDropdown
           options={flightTypeOptions}
           onSelect={handleFlightSelect}
@@ -448,7 +448,7 @@ const FlightSearch = () => {
       </View>
 
       {/* Container for Travel Class dropdown */}
-      <View style={[styles.dropdownContainer, { top: 1, left: 125, width: dropdownWidth }]}>
+      <View style={[styles.dropdownContainer, { top: 1, left: 275, width: dropdownWidth }]}>
         <CustomDropdown
           options={travelClassOptions}
           onSelect={handleTravelClassSelect}
@@ -457,7 +457,7 @@ const FlightSearch = () => {
       </View>
 
       {/* Container for People dropdown */}
-      <View style={[styles.dropdownContainer, { top: 1, left: 225, width: dropdownWidth }]}>
+      <View style={[styles.dropdownContainer, { top: 1, left: 125, width: dropdownWidth }]}>
         <PeopleDropdown
           options={[
             "Adult",
