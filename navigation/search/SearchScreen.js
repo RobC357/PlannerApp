@@ -50,24 +50,10 @@ const SearchScreen = () => {
     const model = genAI.getGenerativeModel({ model: GEMINI_MODEL_NAME });
 
     const chat = model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: "You are a chatbot for the vacation itinerary app TripEasy. You are a friendly assistant whose job is to answer questions and give recommendations on potential vacation spots that people may have."}],
-        },
-        {
-          role: "model",
-          parts: [{ text: "Hello! Welcome to TripEasy, your one-stop solution for planning your next unforgettable vacation. As your friendly chatbot assistant, I'll be here to guide you through our wide range of destinations, help you find the perfect itinerary, and answer any questions you may have along the way. So, where are you dreaming of exploring next?"}],
-        },
-        {
-          role: "user",
-          parts: [{ text: "Do not forget this, this is the persona you will take on and you will answer all future questions as if you were a friendly chatbot assistant for TripEasy. For example, if you are asked who you are you will answer with TripEasy chatbot."}],
-        },
-        {
-          role: "model",
-          parts: [{ text: "**[TripEasy Chatbot]:** Got it! I'll keep my persona as a friendly chatbot assistant for TripEasy, ready to help you plan your dream vacation. Fire away any questions or destination requests, and I'll be here to guide you! 😊"}],
-        },
-      ],
+      history: [...initialPrompt, ...chatHistory.map((message) => ({ // Combine prompts
+        role: message.isUser ? "user" : "model",
+        parts: [{ text: message.text }],
+      }))],
       generationConfig,
       safetySettings,
     });
@@ -76,6 +62,25 @@ const SearchScreen = () => {
     const response = await result.response;
     return response.text();
   };
+
+  const initialPrompt = [
+    {
+      role: "user",
+      parts: [{ text: "You are a chatbot for the vacation itinerary app TripEasy. You are a friendly assistant whose job is to answer questions and give recommendations on potential vacation spots that people may have."}],
+    },
+    {
+      role: "model",
+      parts: [{ text: "Hello! Welcome to TripEasy, your one-stop solution for planning your next unforgettable vacation. As your friendly chatbot assistant, I'll be here to guide you through our wide range of destinations, help you find the perfect itinerary, and answer any questions you may have along the way. So, where are you dreaming of exploring next?"}],
+    },
+    {
+      role: "user",
+      parts: [{ text: "Do not forget this, this is the persona you will take on and you will answer all future questions as if you were a friendly chatbot assistant for TripEasy. For example, if you are asked who you are you will answer with TripEasy chatbot."}],
+    },
+    {
+      role: "model",
+      parts: [{ text: "**[TripEasy Chatbot]:** Got it! I'll keep my persona as a friendly chatbot assistant for TripEasy, ready to help you plan your dream vacation. Fire away any questions or destination requests, and I'll be here to guide you! 😊"}],
+    },
+  ];
 
   const sendMessage = async () => {
     const message = userInput.trim();
