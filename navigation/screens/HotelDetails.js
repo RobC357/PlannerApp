@@ -8,13 +8,13 @@ import MapView, { Marker } from 'react-native-maps';
 import Swiper from 'react-native-swiper';
 
 const HotelDetails = ({ route }) => {
-  const { hotelDetails } = route.params || {};
+  const { hotelDetails, checkInDateTime, checkOutDateTime } = route.params || {};
   const [hotelSaved, setHotelSaved] = useState(false);
   const firestore = getFirestore();
   const auth = getAuth();
 
-  const checkInDateTime = `${moment(hotelDetails.check_in_time, 'h:mm A').format('MMM D, YYYY h:mm A')}`;
-  const checkOutDateTime = `${moment(hotelDetails.check_out_time, 'h:mm A').format('MMM D, YYYY h:mm A')}`;
+  const formattedCheckInDateTime = moment(checkInDateTime).format('MMM D, YYYY');
+const formattedCheckOutDateTime = moment(checkOutDateTime).format('MMM D, YYYY');
 
   useEffect(() => {
     checkHotelSaved();
@@ -38,27 +38,29 @@ const HotelDetails = ({ route }) => {
     thumbnail: image.thumbnail
   }));
 
-
-
   const saveHotel = async () => {
     try {
       const user = auth.currentUser;
-      const checkInTime = moment(hotelDetails.check_in_time, 'h:mm A').toDate();
-      const checkOutTime = moment(hotelDetails.check_out_time, 'h:mm A').toDate();
       if (user && hotelDetails) {
+        // Combine the formatted dates with the times from the API response
+        const checkInDateTime = moment(formattedCheckInDateTime + ' ' + hotelDetails.check_in_time, 'MMM D, YYYY h:mm A').toDate();
+        const checkOutDateTime = moment(formattedCheckOutDateTime + ' ' + hotelDetails.check_out_time, 'MMM D, YYYY h:mm A').toDate();
+  
+        // Prepare the hotel data to be saved in Firestore
         const hotelData = {
           name: hotelDetails.name,
           overall_rating: hotelDetails.overall_rating,
           link: hotelDetails.link,
           price: hotelDetails.rate_per_night.lowest,
           user_uid: user.uid,
-          check_in_time: checkInTime,
-          check_out_time: checkOutTime,
+          check_in_time: checkInDateTime,
+          check_out_time: checkOutDateTime,
           latitude: hotelDetails.gps_coordinates.latitude,
           longitude: hotelDetails.gps_coordinates.longitude,
           images: hotelDetails.images.map(image => image.original_image)
         };
-  
+        
+        // Check if the hotel already exists in Firestore
         const hotelExistsQuery = query(collection(firestore, 'hotels'), where('name', '==', hotelDetails.name), where('user_uid', '==', user.uid));
         const querySnapshot = await getDocs(hotelExistsQuery);
         if (!querySnapshot.empty) {
@@ -66,6 +68,7 @@ const HotelDetails = ({ route }) => {
           return;
         }
   
+        // Save the hotel data to Firestore
         await addDoc(collection(firestore, 'hotels'), hotelData);
         Alert.alert('Success', 'Hotel saved successfully!');
         
@@ -115,8 +118,8 @@ const HotelDetails = ({ route }) => {
         <View style={styles.detailsContainer}>
           <HotelInfo label="Hotel Name" value={hotelDetails.name} />
           <HotelInfo label="Type" value={hotelDetails.type} />
-          <HotelInfo label="Check-In Date & Time" value={checkInDateTime} />
-          <HotelInfo label="Check-Out Date & Time" value={checkOutDateTime} />
+          <HotelInfo label="Check-In Date & Time" value={`${formattedCheckInDateTime} ${hotelDetails.check_in_time}`} />
+         <HotelInfo label="Check-Out Date & Time" value={`${formattedCheckOutDateTime} ${hotelDetails.check_out_time}`} />
           <HotelInfo label="Price" value={`~${hotelDetails.rate_per_night.lowest}`} />
           <View style={styles.ratingContainer}>
             <Text style={styles.label}>Rating:</Text>

@@ -15,6 +15,8 @@ const HotelSearch = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [checkInCalendarVisible, setCheckInCalendarVisible] = useState(false);
   const [checkOutCalendarVisible, setCheckOutCalendarVisible] = useState(false);
+  const [selectedCheckInDate, setSelectedCheckInDate] = useState(new Date());
+  const [selectedCheckOutDate, setSelectedCheckOutDate] = useState(new Date());
   const [cardWidth, setCardWidth] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortKey, setSortKey] = useState('');
@@ -69,7 +71,11 @@ const HotelSearch = () => {
   };
 
   const goToHotelDetails = (hotelDetails) => {
-    navigation.navigate('HotelDetails', { hotelDetails}); 
+    navigation.navigate('HotelDetails', {
+      hotelDetails,
+      checkInDateTime: selectedCheckInDate,
+      checkOutDateTime: selectedCheckOutDate
+    });
   };
 
   // Function to render star icons based on rating
@@ -94,6 +100,12 @@ const HotelSearch = () => {
   };
 
   const renderHotelCard = ({ item }) => {
+    let priceMessage = 'Price not available';
+  
+    if (item.rate_per_night && item.rate_per_night.lowest) {
+      priceMessage = `Price: ${item.rate_per_night.lowest}`;
+    }
+  
     return (
       <TouchableOpacity onPress={() => goToHotelDetails(item)}>
         <View style={[styles.cardContainer, { width: cardWidth }]}>
@@ -111,7 +123,7 @@ const HotelSearch = () => {
               <Text style={styles.ratingText}>({item.reviews})</Text>
             </View>
             {/* Display hotel price */}
-            <Text style={styles.overlayText}>Price: {item.rate_per_night.lowest}</Text>
+            <Text style={styles.overlayText}>{priceMessage}</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -223,63 +235,63 @@ const HotelSearch = () => {
 
       {/* Check In Calendar modal */}
       <Modal
-        visible={checkInCalendarVisible}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setCheckInCalendarVisible(false)}
-      >
-        {/* Calendar content */}
-        <TouchableWithoutFeedback onPress={() => setCheckInCalendarVisible(false)}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <CalendarPicker
-                minDate={new Date()} // Prevent selecting dates before today
-                onDateChange={(date) => {
-                  setSelectedDate(date);
-                  const formattedDate = date.toISOString().split('T')[0]; // Formats the date as YYYY-MM-DD
-                  setCheckInDate(formattedDate);
-                  if (moment(date).isAfter(checkOutDate)) {
-                    setCheckOutDate(formattedDate);
-                  }
-                  setCheckInCalendarVisible(false);
-                }}
-                width={300}
-                height={400}
-              />
-            </View>
+      visible={checkInCalendarVisible}
+      animationType="fade"
+      transparent={true}
+      onRequestClose={() => setCheckInCalendarVisible(false)}
+    >
+      {/* Calendar content */}
+      <TouchableWithoutFeedback onPress={() => setCheckInCalendarVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <CalendarPicker
+              minDate={new Date()} // Prevent selecting dates before today
+              onDateChange={(date) => {
+                setSelectedCheckInDate(date);
+                const formattedDate = date.toISOString().split('T')[0]; // Formats the date as YYYY-MM-DD
+                setCheckInDate(formattedDate);
+                if (moment(date).isAfter(checkOutDate)) {
+                  setCheckOutDate(formattedDate);
+                }
+                setCheckInCalendarVisible(false);
+              }}
+              width={300}
+              height={400}
+            />
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
 
       {/* Check Out Calendar modal */}
       <Modal
-        visible={checkOutCalendarVisible}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setCheckOutCalendarVisible(false)}
-      >
-        {/* Calendar content */}
-        <TouchableWithoutFeedback onPress={() => setCheckOutCalendarVisible(false)}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <CalendarPicker
-                minDate={new Date()} // Prevent selecting dates before today
-                onDateChange={(date) => {
-                  setSelectedDate(date);
-                  const formattedDate = date.toISOString().split('T')[0]; // Formats the date as YYYY-MM-DD
-                  setCheckOutDate(formattedDate);
-                  if (moment(date).isBefore(checkInDate)) {
-                    setCheckInDate(formattedDate);
-                  }
-                  setCheckOutCalendarVisible(false);
-                }}
-                width={300}
-                height={400}
-              />
-            </View>
+      visible={checkOutCalendarVisible}
+      animationType="fade"
+      transparent={true}
+      onRequestClose={() => setCheckOutCalendarVisible(false)}
+    >
+      {/* Calendar content */}
+      <TouchableWithoutFeedback onPress={() => setCheckOutCalendarVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <CalendarPicker
+              minDate={new Date()} // Prevent selecting dates before today
+              onDateChange={(date) => {
+                setSelectedCheckOutDate(date);
+                const formattedDate = date.toISOString().split('T')[0]; // Formats the date as YYYY-MM-DD
+                setCheckOutDate(formattedDate);
+                if (moment(date).isBefore(checkInDate)) {
+                  setCheckInDate(formattedDate);
+                }
+                setCheckOutCalendarVisible(false);
+              }}
+              width={300}
+              height={400}
+            />
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
     </View>
   );
 };

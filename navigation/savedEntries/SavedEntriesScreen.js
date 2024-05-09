@@ -108,7 +108,7 @@ const SavedEntriesScreen = () => {
       const flightsRef = collection(firestore, 'flights');
       const querySnapshot = await getDocs(flightsRef);
       const flightsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const userFlights = flightsData.filter(flight => flight.userUID === userId);
+      const userFlights = flightsData.filter(flight => flight.user_uid === userId);
       setFlights(userFlights);
       setError(null);
     } catch (error) {
