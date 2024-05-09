@@ -87,31 +87,33 @@ const SavedEntriesScreen = () => {
     }
   };
 
-  const fetchFlights = async () => {
-    try {
-      const flightsRef = collection(firestore, 'flights');
-      const querySnapshot = await getDocs(flightsRef);
-      const flightsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setFlights(flightsData);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching flights: ', error);
-      setError('Error fetching flights');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const fetchMarkers = async (userId) => {
     try {
       const markersRef = collection(firestore, 'markers');
       const snapshot = await getDocs(markersRef);
       const markersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setMarkers(markersData);
+      const userMarkers = markersData.filter(marker => marker.userUID === userId);
+      setMarkers(userMarkers);
       setError(null);
     } catch (error) {
       console.error('Error fetching markers: ', error);
       setError('Error fetching markers');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const fetchFlights = async (userId) => {
+    try {
+      const flightsRef = collection(firestore, 'flights');
+      const querySnapshot = await getDocs(flightsRef);
+      const flightsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const userFlights = flightsData.filter(flight => flight.userUID === userId);
+      setFlights(userFlights);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching flights: ', error);
+      setError('Error fetching flights');
     } finally {
       setLoading(false);
     }
