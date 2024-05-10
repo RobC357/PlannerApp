@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { FontAwesome } from '@expo/vector-icons';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Modal, TouchableOpacity, Alert, SafeAreaView, Keyboard } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'; // Updated import
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Modal, TouchableOpacity, Alert, SafeAreaView, KeyboardAvoidingView } from 'react-native'; // Updated import
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
 
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 
@@ -177,17 +177,18 @@ const SearchScreen = () => {
     setTrashDisabled(chatHistory.length === 0);
   }, [chatHistory]);
 
- return (
+  return (
     <SafeAreaView style={{ flex: 1 }}>
-      <KeyboardAwareScrollView
+<KeyboardAwareScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         extraScrollHeight={Platform.select({ ios: 50, android: 0 })}
         enableOnAndroid={true}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.container}>
+                <View style={styles.container}>
           <Text style={styles.header}>TripEasy Chatbot</Text>
           <View style={styles.chatHistory}>
+            {/* Render chat history */}
             {chatHistory.map((message, index) => (
               <View key={index} style={[styles.messageContainer, message.isUser ? styles.userMessageContainer : styles.botMessageContainer]}>
                 <Text style={styles.messageText}>{message.text}</Text>
@@ -249,6 +250,7 @@ const SearchScreen = () => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
