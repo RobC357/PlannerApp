@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { FontAwesome } from '@expo/vector-icons';
-import { View, Text, TextInput, ScrollView, Button, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Modal, TouchableOpacity, Alert, SafeAreaView, Keyboard } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scrollview';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Modal, TouchableOpacity, Alert, SafeAreaView, Keyboard } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'; // Updated import
 
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 
@@ -177,7 +177,7 @@ const SearchScreen = () => {
     setTrashDisabled(chatHistory.length === 0);
   }, [chatHistory]);
 
-  return (
+ return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAwareScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -187,13 +187,13 @@ const SearchScreen = () => {
       >
         <View style={styles.container}>
           <Text style={styles.header}>TripEasy Chatbot</Text>
-          <ScrollView style={styles.chatHistory} contentContainerStyle={{ paddingBottom: 20 }}>
+          <View style={styles.chatHistory}>
             {chatHistory.map((message, index) => (
               <View key={index} style={[styles.messageContainer, message.isUser ? styles.userMessageContainer : styles.botMessageContainer]}>
                 <Text style={styles.messageText}>{message.text}</Text>
               </View>
             ))}
-          </ScrollView>
+          </View>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.textInput}
@@ -249,7 +249,6 @@ const SearchScreen = () => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

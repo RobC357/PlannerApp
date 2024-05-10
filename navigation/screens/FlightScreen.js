@@ -496,12 +496,13 @@ const FlightSearch = () => {
 
       {/* Flight results section */}
       <FlatList
-        data={flights}
-        renderItem={renderFlightCard}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.flatListContainer}
-        horizontal={false} // Restrict scrolling to vertical movement
-      />
+  data={flights}
+  renderItem={renderFlightCard}
+  keyExtractor={(item, index) => index.toString()}
+  contentContainerStyle={styles.flatListContainer}
+  horizontal={false} // Restrict scrolling to vertical movement
+  keyboardShouldPersistTaps="handled" // Prevent the screen from scrolling
+/>
 
       {/* Loading Indicator */}
       {loading && (
