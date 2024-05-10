@@ -171,7 +171,8 @@ const SavedEntriesScreen = () => {
   };
 
   const handleHotelPress = (hotel) => {
-    Linking.openURL(hotel.link);
+    navigation.navigate('HotelLogDetails', { hotel });
+    //Linking.openURL(hotel.link);
   };
 
   const deleteEntry = async (entryId) => {
