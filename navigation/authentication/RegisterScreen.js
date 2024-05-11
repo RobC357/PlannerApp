@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
 
 const auth = getAuth();
 
@@ -35,10 +35,22 @@ const RegisterScreen = ({ navigation }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   
+      // Send email verification
+      await sendEmailVerification(auth.currentUser);
+  
       // Set the display name for the user
       await updateProfile(userCredential.user, { displayName: displayName });
   
-      // Navigate to the profile screen
+      // Inform the user to verify their email
+      Alert.alert(
+        'Verification Email Sent',
+        'A verification email has been sent. Please verify your email before logging in.',
+        [
+          { text: 'OK', onPress: () => navigation.navigate('LandingPage') }
+        ]
+      );
+  
+      // Navigate to the landing page or any other screen as needed
       navigation.navigate('LandingPage');
     } catch (error) {
       // Handle registration errors

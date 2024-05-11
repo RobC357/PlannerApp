@@ -1,29 +1,23 @@
 import React, { useState } from 'react';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 const auth = getAuth();
 
-export function useAuthentication() 
-{
-  const [user, setUser] = useState('');
+export function useAuthentication() {
+  const [user, setUser] = useState(null); // Use null for initial state
 
-  React.useEffect(() => 
-  {
-    const unsubscribeFromAuthStatuChanged = onAuthStateChanged(auth, (user) => 
-    {
-      if (user) 
-      {
+  React.useEffect(() => {
+    const unsubscribeFromAuthStatuChanged = onAuthStateChanged(auth, (user) => {
+      if (user && user.emailVerified) 
+        { 
         setUser(user);
       } else 
       {
-        setUser(undefined);
+        setUser(null);
       }
     });
-
     return unsubscribeFromAuthStatuChanged;
   }, []);
 
-  return {
-    user
-  };
+  return { user }; 
 }

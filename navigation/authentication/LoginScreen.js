@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } from 'firebase/auth';
 
 const auth = getAuth();
 
@@ -22,9 +22,45 @@ const LoginScreen = ({ navigation }) => {
       setError('Please fill in a password.');
     } else {
       try {
-        await signInWithEmailAndPassword(auth, username, password);
-        handleClose();
-        resetErrorMessage();
+        const userCredential = await signInWithEmailAndPassword(auth, username, password);
+        const user = userCredential.user;
+
+        if (user.emailVerified) {
+          handleClose();
+          resetErrorMessage();
+        } else {
+          // Prompt user to verify email
+          Alert.alert(
+            'Verify Your Email',
+            'Please verify your email address to continue.',
+            [
+              {
+                text: 'Resend Verification Email',
+                onPress: async () => {
+                  try {
+                    const user = getAuth().currentUser;
+                    if (user) {
+                      await sendEmailVerification(user);
+                      Alert.alert('Verification Email Sent', 'Check your email for a new verification link.');
+                    } else {
+                      console.error("No user currently signed in.");
+                      // Handle the case where there's no signed-in user (e.g., show an error message)
+                    }
+                  } catch (error) {
+                    console.error("Error resending verification email:", error);
+                    // Handle the error appropriately 
+                  }
+                },
+              },
+              {
+                text: 'OK',
+                onPress: () => {
+                  auth.signOut(); // Sign out the unverified user
+                },
+              },
+            ]
+          );
+        }
       } catch (error) {
         // Handle specific error cases
         switch (error.code) {
@@ -83,6 +119,7 @@ const LoginScreen = ({ navigation }) => {
             value={username}
             onChangeText={setUsername}
             placeholder="Email"
+            keyboardType="email-address"
           />
           <View style={styles.passwordInputContainer}>
             <TextInput
