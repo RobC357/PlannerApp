@@ -9,7 +9,7 @@ import { getFirestore, collection, addDoc, getDocs , serverTimestamp } from 'fir
 import { getAuth } from 'firebase/auth';
 import { FontAwesome } from '@expo/vector-icons';
 
-Geocoder.init("AIzaSyBNAj7uomTA-m9Gja0gV8-wv2YQdIHGCo8");
+Geocoder.init("PLACES-API-KEY");
 
 const MapScreen = ( { route } ) => {
   const [markers, setMarkers] = useState([]);
@@ -299,7 +299,7 @@ const MapScreen = ( { route } ) => {
             onPress={handlePlaceSelect}
             fetchDetails
             query={{
-              key: 'AIzaSyBNAj7uomTA-m9Gja0gV8-wv2YQdIHGCo8',
+              key: 'PLACES-API-KEY',
               language: 'en',
             }}
             styles={{

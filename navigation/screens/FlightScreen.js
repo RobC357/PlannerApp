@@ -187,7 +187,7 @@ const FlightSearch = () => {
       const response = await axios.get("https://serpapi.com/search", {
         params: {
           api_key:
-            "9978848158bdda2246a6190f20c0ec8611ba53cec5e0c364ea877d68aba3d976",
+            "SERPAPI-API-KEY",
           engine: "google_flights",
           departure_id: departurePlaceId,
           arrival_id: arrivalPlaceId,
@@ -238,7 +238,7 @@ const FlightSearch = () => {
         {
           params: {
             address: address,
-            key: "AIzaSyBNAj7uomTA-m9Gja0gV8-wv2YQdIHGCo8", // Replace with your Google Geocoding API key
+            key: "PLACES-API-KEY", // Replace with your Google Geocoding API key
           },
         }
       );
@@ -389,7 +389,7 @@ const FlightSearch = () => {
             placeholder="Departure Airport"
             onPress={handleDepartureSelection}
             query={{
-              key: "AIzaSyBNAj7uomTA-m9Gja0gV8-wv2YQdIHGCo8",
+              key: "PLACES-API-KEY",
               language: "en",
             }}
             styles={{
@@ -403,7 +403,7 @@ const FlightSearch = () => {
             placeholder="Arrival Airport"
             onPress={handleArrivalSelection}
             query={{
-              key: "AIzaSyBNAj7uomTA-m9Gja0gV8-wv2YQdIHGCo8",
+              key: "PLACES-API-KEY",
               language: "en",
             }}
             styles={{

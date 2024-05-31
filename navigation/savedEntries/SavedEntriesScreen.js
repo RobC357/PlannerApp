@@ -13,7 +13,7 @@ const MapImage = ({ latitude, longitude }) => {
     return <Text>No location data</Text>;
   }
 
-  const API_KEY = 'AIzaSyBNAj7uomTA-m9Gja0gV8-wv2YQdIHGCo8'; 
+  const API_KEY = 'PLACES-API-KEY'; 
   const imageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=12&size=400x400&markers=color:red|${latitude},${longitude}&key=${API_KEY}`;
 
   return <Image source={{ uri: imageUrl }} style={{ width: 100, height: 100 }} />;

@@ -43,7 +43,7 @@ const HotelSearch = () => {
     try {
       const response = await axios.get('https://serpapi.com/search', {
         params: {
-          api_key: '9978848158bdda2246a6190f20c0ec8611ba53cec5e0c364ea877d68aba3d976',
+          api_key: 'SERPAPI-API-KEY',
           engine: 'google_hotels',
           q: searchQuery, // Use the search query entered by the user
           check_in_date: checkInDate,
